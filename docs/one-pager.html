@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>StrokeSense — Project Description</title>
+<style>
+  @page { size: A4; margin: 12mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; color: #0f172a; margin: 0; font-size: 9.6pt; line-height: 1.38; }
+  .page { max-width: 186mm; margin: 0 auto; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #e11d48; padding-bottom: 6px; margin-bottom: 8px; }
+  h1 { font-size: 22pt; margin: 0; letter-spacing: -0.5px; }
+  h1 span { color: #e11d48; }
+  .tag { font-size: 10.5pt; color: #475569; margin: 2px 0 0; }
+  .event { text-align: right; font-size: 8.5pt; color: #64748b; }
+  h2 { font-size: 10.5pt; color: #e11d48; text-transform: uppercase; letter-spacing: 0.6px; margin: 9px 0 3px; }
+  p { margin: 0 0 4px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 8.8pt; }
+  th, td { text-align: left; padding: 2.5px 5px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  th { background: #f8fafc; color: #475569; font-weight: 600; }
+  td b.l { display: inline-block; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 4px; background: #e11d48; color: #fff; font-size: 8.5pt; margin-right: 4px; }
+  ul { margin: 0; padding-left: 15px; }
+  li { margin-bottom: 2px; }
+  .box { background: #fff1f2; border: 1px solid #fecdd3; border-radius: 6px; padding: 6px 8px; }
+  .pipe { font-family: Consolas, monospace; font-size: 7.6pt; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px 7px; white-space: pre-wrap; }
+  footer { margin-top: 8px; font-size: 7.8pt; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 4px; }
+  .hint { position: fixed; top: 8px; right: 8px; background: #0f172a; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 9pt; }
+  @media print { .hint { display: none; } }
+</style>
+</head>
+<body>
+<div class="hint">Ctrl+P → "Save as PDF" (A4, margins: default, background graphics on)</div>
+<div class="page">
+  <header>
+    <div>
+      <h1>Stroke<span>Sense</span></h1>
+      <p class="tag">Spot a stroke in 60 seconds, with just a phone — on-device AI for the BE-FAST check</p>
+    </div>
+    <div class="event">DSH Hacks V2 · AI × Healthcare<br>Live demo: <i>[add Vercel URL]</i><br>Code: <i>[add GitHub URL]</i></div>
+  </header>
+
+  <h2>The problem</h2>
+  <p>In a stroke the brain loses about <b>1.9 million neurons every minute</b>. Clot-dissolving treatment is mainly given
+  within <b>~4.5 hours</b> of onset, but many patients reach hospital too late because family members don't recognise the
+  signs or wait to see if they pass. The BE-FAST checklist exists, but a frightened bystander cannot apply it reliably,
+  and the emergency team often arrives without the one fact it needs most: <i>when was the person last seen well?</i></p>
+
+  <h2>Our solution</h2>
+  <p>A browser app (no install) that walks anyone through BE-FAST in about a minute, <b>measures</b> the warning signs with
+  the phone's camera and microphone, gives one clear instruction, and hands the hospital a structured report.</p>
+
+  <table>
+    <tr><th style="width:24%">Check</th><th>How it is measured</th></tr>
+    <tr><td><b class="l">T</b>Time</td><td>"Last known well" recorded first; time-window guidance (≤4.5 h, ≤24 h).</td></tr>
+    <tr><td><b class="l">B</b><b class="l">E</b>Balance, Eyes</td><td>Guided bystander questions on sudden balance or vision loss.</td></tr>
+    <tr><td><b class="l">F</b>Face</td><td>MediaPipe Face Landmarker (478 pts). Mouth-corner excursion from rest → smile in a face-aligned frame (cancels head tilt and distance); turned-head frames rejected. Asymmetry index + droop.</td></tr>
+    <tr><td><b class="l">A</b>Arms</td><td>MediaPipe Pose: wrist height vs shoulder line over a 10 s eyes-closed hold — a camera pronator-drift test. Detects one-sided drift or failure to raise; ignores both arms tiring.</td></tr>
+    <tr><td><b class="l">S</b>Speech</td><td>Cincinnati sentence: word error rate + on-device pause analysis + bystander judgement (human in the loop).</td></tr>
+  </table>
+
+  <div class="grid">
+    <div>
+      <h2>Key features</h2>
+      <ul>
+        <li><b>One clear answer:</b> any single warning sign → "Call 108 now" (paramedic rule).</li>
+        <li><b>Explainable:</b> every finding shows its measurement, e.g. "left side moved 52% less".</li>
+        <li><b>ER handoff QR code:</b> clinician report with findings, measurements and onset time.</li>
+        <li><b>Nearby hospitals</b> (OpenStreetMap) with call and directions.</li>
+        <li><b>English · हिन्दी · தமிழ்</b> results, read aloud for low-literacy users.</li>
+        <li><b>Offline-capable PWA</b> for low-connectivity areas.</li>
+      </ul>
+    </div>
+    <div>
+      <h2>Safety, privacy, ethics</h2>
+      <ul>
+        <li><b>No video leaves the device</b> — vision models run in the browser (WebAssembly).</li>
+        <li><b>Zero server storage:</b> the report lives in the link's #fragment, which browsers never send; decoded input is validated.</li>
+        <li><b>Never a false all-clear:</b> skipped/failed checks → "inconclusive".</li>
+        <li><b>No generated medical advice:</b> fixed, reviewable templates instead of an LLM.</li>
+        <li>Framed as a screening aid, not a diagnosis.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Architecture</h2>
+  <div class="pipe">Camera/Mic → MediaPipe (WASM, GPU→CPU) + Web Audio + Web Speech → feature extractors (asymmetry, drift, WER, pauses)
+  → pure-TypeScript rule engine → risk tier → i18n results · QR report (URL fragment) · hospitals (Overpass)
+Stack: Next.js 16 · React 19 · TypeScript · Tailwind 4 · MediaPipe Tasks · Vitest · Playwright · Service Worker</div>
+
+  <div class="grid">
+    <div>
+      <h2>Evidence &amp; testing</h2>
+      <p><b>Synthetic robustness study</b> (seeded, reproducible): the real scoring engine on 400 positive + 400 negative simulated exams per condition, with phone-camera noise.</p>
+      <table>
+        <tr><th>Test / condition</th><th>Sens.</th><th>Spec.</th></tr>
+        <tr><td>Face — typical phone</td><td>100%</td><td>99.3%</td></tr>
+        <tr><td>Face — hard (3 px jitter, ±20° tilt)</td><td>98.5%</td><td>93.8%</td></tr>
+        <tr><td>Arms — typical phone (incl. fatigue)</td><td>100%</td><td>100%</td></tr>
+      </table>
+      <p style="margin-top:3px">Plus 44 unit tests and a 10-step end-to-end browser test. <i>Not clinical validation.</i></p>
+    </div>
+    <div>
+      <h2>Impact &amp; next steps</h2>
+      <p>India has roughly <b>1.2 million new strokes a year</b> (GBD 2021: 88 per 100,000; Behera et al., <i>Sci Rep</i> 2024),
+      and limited specialist access outside cities. A free,
+      private, offline-capable tool on the phones people already own can shorten the time to calling an ambulance and
+      give hospitals a head start.</p>
+      <div class="box"><b>Next:</b> calibrate thresholds on clinical data (Toronto NeuroFace, TORGO) and an ED pilot;
+      add eye-movement and gait tests; connect to 108 dispatch; more Indian languages.</div>
+    </div>
+  </div>
+
+  <footer>StrokeSense is a screening aid and does not provide a diagnosis. Thresholds are provisional and not clinically validated. If you suspect a stroke, call emergency services immediately (India: 108 / 112).</footer>
+</div>
+</body>
+</html>
