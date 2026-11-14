@@ -24,7 +24,7 @@ const SKELETON: Array<[number, number]> = [
 ];
 
 export function ArmTest({ onComplete }: { onComplete: (r: TestResult) => void }) {
-  const { videoRef, status, error } = useCamera();
+  const { videoRef, status, error, retry } = useCamera();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const landmarker = useRef<PoseLandmarker | null>(null);
   const frames = useRef<ArmFrame[]>([]);
@@ -126,7 +126,7 @@ export function ArmTest({ onComplete }: { onComplete: (r: TestResult) => void })
         "Close the eyes and hold still for 10 seconds.",
       ]}
     >
-      <CameraStage videoRef={videoRef} canvasRef={canvasRef} status={status} error={error}>
+      <CameraStage videoRef={videoRef} canvasRef={canvasRef} status={status} error={error} onRetry={retry}>
         <ArmMeters heights={heights} />
         {(stage === "position" || stage === "hold") && (
           <div className="absolute inset-x-0 bottom-0 space-y-2 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">

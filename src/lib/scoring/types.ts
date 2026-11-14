@@ -1,4 +1,4 @@
-export type TestId = "face" | "arm" | "speech";
+export type TestId = "balance" | "eyes" | "face" | "arm" | "speech";
 
 /**
  * normal       – no sign detected

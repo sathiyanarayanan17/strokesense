@@ -1,16 +1,25 @@
 import Link from "next/link";
 
 const STEPS = [
+  { letter: "B", title: "Balance", text: "A quick question about sudden loss of balance, dizziness or trouble walking." },
+  { letter: "E", title: "Eyes", text: "A quick question about sudden vision loss or double vision." },
   { letter: "F", title: "Face", text: "Face-mesh tracking measures how evenly each side of the mouth moves when smiling." },
   { letter: "A", title: "Arms", text: "Body-pose tracking detects one arm drifting down — a camera version of the pronator-drift test." },
   { letter: "S", title: "Speech", text: "Checks a standard sentence for wrong words, slurring and pauses, plus your own judgement." },
   { letter: "T", title: "Time", text: "Records when the person was last seen normal — the fact doctors need most." },
 ];
 
+const AFTER = [
+  { title: "One clear answer", text: "Any single warning sign means call 108 now — the same rule paramedics use." },
+  { title: "Handoff QR code", text: "A clinician-ready report the ER team can scan. Nothing is stored on a server." },
+  { title: "Nearby hospitals", text: "Distances and directions from OpenStreetMap, one tap away." },
+  { title: "English · हिन्दी · தமிழ்", text: "Results explained in the family's language, and read aloud." },
+];
+
 const FACTS = [
-  { value: "60 sec", label: "guided check" },
+  { value: "60 sec", label: "guided BE-FAST check" },
   { value: "0 frames", label: "of video leave the device" },
-  { value: "No app", label: "to install — works in the browser" },
+  { value: "Offline", label: "works without internet after the first visit" },
 ];
 
 export default function Home() {
@@ -57,7 +66,7 @@ export default function Home() {
         <h2 id="how" className="text-3xl font-black text-slate-900">
           How it works
         </h2>
-        <ul className="mt-8 grid gap-4 sm:grid-cols-2">
+        <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {STEPS.map((s) => (
             <li key={s.letter} className="flex gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-rose-600 text-2xl font-black text-white" aria-hidden>
@@ -67,6 +76,20 @@ export default function Home() {
                 <h3 className="text-lg font-bold text-slate-900">{s.title}</h3>
                 <p className="text-slate-600">{s.text}</p>
               </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="mx-auto max-w-5xl px-4 pb-16" aria-labelledby="after">
+        <h2 id="after" className="text-3xl font-black text-slate-900">
+          After the check
+        </h2>
+        <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {AFTER.map((a) => (
+            <li key={a.title} className="rounded-2xl bg-rose-50 p-5 ring-1 ring-rose-100">
+              <h3 className="font-bold text-slate-900">{a.title}</h3>
+              <p className="mt-1 text-sm text-slate-600">{a.text}</p>
             </li>
           ))}
         </ul>

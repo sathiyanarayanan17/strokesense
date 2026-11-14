@@ -63,6 +63,10 @@ export function assessRisk(results: TestResult[]): RiskAssessment {
 
 export interface OnsetInfo {
   hoursSince: number;
+  hours: number;
+  minutes: number;
+  /** early: ≤4.5 h (clot-dissolving window) · day: ≤24 h · late: >24 h */
+  window: "early" | "day" | "late";
   label: string;
   message: string;
 }
@@ -76,11 +80,12 @@ export function describeOnset(lastKnownWell: string | null, now: number): OnsetI
   const h = Math.floor(hoursSince);
   const m = Math.floor((hoursSince - h) * 60);
   const label = h > 0 ? `${h} h ${m} min ago` : `${m} min ago`;
+  const window = hoursSince <= 4.5 ? "early" : hoursSince <= 24 ? "day" : "late";
   const message =
-    hoursSince <= 4.5
+    window === "early"
       ? "Still within the early window when clot-dissolving treatment may be possible. Every minute counts."
-      : hoursSince <= 24
+      : window === "day"
         ? "Some treatments may still be possible. Get to hospital without delay."
         : "Tell the medical team exactly when symptoms began.";
-  return { hoursSince, label, message };
+  return { hoursSince, hours: h, minutes: m, window, label, message };
 }

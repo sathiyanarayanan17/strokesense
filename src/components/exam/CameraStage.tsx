@@ -8,12 +8,13 @@ interface Props {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   status: CameraStatus;
   error: string | null;
+  onRetry?: () => void;
   /** Overlay content (instructions, countdown) shown on top of the video. */
   children?: ReactNode;
 }
 
 /** Mirrored selfie view with a landmark overlay. Video and canvas are mirrored together so they stay aligned. */
-export function CameraStage({ videoRef, canvasRef, status, error, children }: Props) {
+export function CameraStage({ videoRef, canvasRef, status, error, onRetry, children }: Props) {
   return (
     <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-slate-900 shadow-lg sm:aspect-video">
       <div className="absolute inset-0 -scale-x-100">
@@ -27,8 +28,13 @@ export function CameraStage({ videoRef, canvasRef, status, error, children }: Pr
         </div>
       )}
       {status === "error" && (
-        <div className="absolute inset-0 grid place-items-center p-6 text-center text-red-200" role="alert">
-          {error}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center text-red-200" role="alert">
+          <p>{error}</p>
+          {onRetry && (
+            <button type="button" onClick={onRetry} className="rounded-full bg-white px-5 py-2 font-semibold text-slate-900 hover:bg-slate-100">
+              Retry camera
+            </button>
+          )}
         </div>
       )}
       {status === "ready" && children}

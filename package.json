@@ -8,21 +8,26 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "eval": "vitest run --config vitest.eval.config.mts",
+    "e2e": "node scripts/e2e-smoke.mjs",
     "postinstall": "node scripts/setup-assets.mjs"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "1.2.3",
     "next": "16.4.6",
+    "qrcode": "1.5.4",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "24.19.2",
+    "@types/qrcode": "1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "playwright-core": "1.65.1",
     "tailwindcss": "4.3.3",
     "typescript": "^5",
     "vitest": "5.1.0"

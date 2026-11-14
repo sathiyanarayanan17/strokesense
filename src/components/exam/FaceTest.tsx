@@ -21,7 +21,7 @@ const PHASES: Array<{ name: FacePhase; ms: number; say: string; show: string }> 
 type Hint = "searching" | "turned" | "good";
 
 export function FaceTest({ onComplete }: { onComplete: (r: TestResult) => void }) {
-  const { videoRef, status, error } = useCamera();
+  const { videoRef, status, error, retry } = useCamera();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const landmarker = useRef<FaceLandmarker | null>(null);
   const frames = useRef<FaceFrame[]>([]);
@@ -111,7 +111,7 @@ export function FaceTest({ onComplete }: { onComplete: (r: TestResult) => void }
         "When asked, smile widely and show the teeth.",
       ]}
     >
-      <CameraStage videoRef={videoRef} canvasRef={canvasRef} status={status} error={error}>
+      <CameraStage videoRef={videoRef} canvasRef={canvasRef} status={status} error={error} onRetry={retry}>
         <div className="absolute inset-x-0 top-0 p-3">
           <TrackingBadge modelState={modelState} hint={hint} />
         </div>

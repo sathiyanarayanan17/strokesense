@@ -4,14 +4,24 @@ import { useReducer } from "react";
 import { inconclusive, type TestId, type TestResult } from "@/lib/scoring/types";
 import { stopSpeaking } from "@/lib/voice";
 import { ArmTest } from "./ArmTest";
+import { CameraProvider } from "./camera";
 import { FaceTest } from "./FaceTest";
 import { OnsetStep } from "./OnsetStep";
 import { Results } from "./Results";
 import { SpeechTest } from "./SpeechTest";
+import { SymptomStep } from "./SymptomStep";
 
-type Step = "onset" | TestId | "results";
-const ORDER: Step[] = ["onset", "face", "arm", "speech", "results"];
-const LABELS: Record<Step, string> = { onset: "Time", face: "Face", arm: "Arms", speech: "Speech", results: "Result" };
+type CameraTest = "face" | "arm" | "speech";
+type Step = "onset" | "symptoms" | CameraTest | "results";
+const ORDER: Step[] = ["onset", "symptoms", "face", "arm", "speech", "results"];
+const LABELS: Record<Step, string> = {
+  onset: "Time",
+  symptoms: "Balance · Eyes",
+  face: "Face",
+  arm: "Arms",
+  speech: "Speech",
+  results: "Result",
+};
 
 interface State {
   step: Step;
@@ -22,7 +32,7 @@ interface State {
 
 type Action =
   | { type: "onset"; lastKnownWell: string | null }
-  | { type: "result"; result: TestResult; at: number }
+  | { type: "result"; results: TestResult[]; at: number }
   | { type: "restart" };
 
 const initial: State = { step: "onset", lastKnownWell: null, results: [], completedAt: null };
@@ -34,9 +44,10 @@ function next(step: Step): Step {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "onset":
-      return { ...state, lastKnownWell: action.lastKnownWell, step: "face" };
+      return { ...state, lastKnownWell: action.lastKnownWell, step: "symptoms" };
     case "result": {
-      const results = [...state.results.filter((r) => r.test !== action.result.test), action.result];
+      const replaced = new Set(action.results.map((r) => r.test));
+      const results = [...state.results.filter((r) => !replaced.has(r.test)), ...action.results];
       const step = next(state.step);
       return { ...state, results, step, completedAt: step === "results" ? action.at : state.completedAt };
     }
@@ -47,18 +58,21 @@ function reducer(state: State, action: Action): State {
 
 export function ExamFlow() {
   const [state, dispatch] = useReducer(reducer, initial);
-  const record = (result: TestResult) => {
+  const record = (...results: TestResult[]) => {
     stopSpeaking();
-    dispatch({ type: "result", result, at: Date.now() });
+    dispatch({ type: "result", results, at: Date.now() });
   };
   const skip = (test: TestId) => record(inconclusive(test, "This check was skipped.", ["Skipped by the user."]));
   const isTest = state.step === "face" || state.step === "arm" || state.step === "speech";
+  const cameraActive = state.step === "face" || state.step === "arm";
 
   return (
+    <CameraProvider active={cameraActive}>
     <div className="space-y-8">
       <Stepper current={state.step} />
 
       {state.step === "onset" && <OnsetStep onDone={(lastKnownWell) => dispatch({ type: "onset", lastKnownWell })} />}
+      {state.step === "symptoms" && <SymptomStep onDone={(results) => record(...results)} />}
       {state.step === "face" && <FaceTest key="face" onComplete={record} />}
       {state.step === "arm" && <ArmTest key="arm" onComplete={record} />}
       {state.step === "speech" && <SpeechTest key="speech" onComplete={record} />}
@@ -83,6 +97,7 @@ export function ExamFlow() {
         </div>
       )}
     </div>
+    </CameraProvider>
   );
 }
 
