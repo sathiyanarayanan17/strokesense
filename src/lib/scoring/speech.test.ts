@@ -70,4 +70,18 @@ describe("scoreSpeech", () => {
     const r = scoreSpeech({ transcript: TARGET_SENTENCE, energy: choppy, noiseFloor: 0.005 });
     expect(r.finding).toBe("borderline");
   });
+
+  it("lets the speech model raise a possible sign, but never a warning sign alone", () => {
+    const base = { transcript: TARGET_SENTENCE, energy: fluent, noiseFloor: 0.005 };
+    const high = scoreSpeech({ ...base, modelProbability: 0.92 });
+    expect(high.finding).toBe("borderline");
+    expect(high.metrics.slurProbability).toBe(0.92);
+    expect(high.summary).toMatch(/speech model/);
+    expect(scoreSpeech({ ...base, modelProbability: 0.2 }).finding).toBe("normal");
+  });
+
+  it("does not let the model turn an unassessable recording into a finding", () => {
+    const r = scoreSpeech({ transcript: "", energy: energy([]), noiseFloor: 0.005, modelProbability: 0.99 });
+    expect(r.finding).toBe("inconclusive");
+  });
 });

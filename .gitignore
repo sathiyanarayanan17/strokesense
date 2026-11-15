@@ -45,3 +45,10 @@ next-env.d.ts
 /public/models/
 e2e-failure.png
 /export/
+
+# ML: dataset (TORGO is not redistributable), venv and logs
+/ml/data/
+/ml/.venv/
+/ml/*.log
+/ml/*.err
+__pycache__/

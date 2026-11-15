@@ -121,6 +121,9 @@ export interface SpeechInput {
   noiseFloor: number;
   bystander?: BystanderAnswer;
   target?: string;
+  /** On-device speech model output, P(dysarthric). null/undefined = not available. */
+  modelProbability?: number | null;
+  modelThreshold?: number;
 }
 
 const SEVERITY: Record<Finding, number> = { inconclusive: 0, normal: 1, borderline: 2, abnormal: 3 };
@@ -163,6 +166,17 @@ export function scoreSpeech(input: SpeechInput): TestResult {
   if (va.voicedMs >= S.minVoicedMs && va.pauseRatio >= S.pauseRatioBorderline) {
     machine = worse(machine, "borderline");
     reasons.push("there were long pauses inside the sentence");
+  }
+
+  // Trained speech model (TORGO). Supporting evidence only: it can raise a
+  // "possible sign" but never a warning sign by itself (see docs/SPEECH_MODEL.md).
+  const p = input.modelProbability;
+  if (typeof p === "number" && Number.isFinite(p)) {
+    metrics.slurProbability = round(p);
+    if (p >= (input.modelThreshold ?? 0.5) && machine !== "inconclusive") {
+      machine = worse(machine, "borderline");
+      reasons.push(`the speech model detected slurred-speech patterns (${Math.round(p * 100)}%)`);
+    }
   }
 
   // 2. Human-in-the-loop

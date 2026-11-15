@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     // Vendored MediaPipe runtime + models copied by scripts/setup-assets.mjs
     "public/mediapipe/**",
     "public/models/**",
+    // Python training pipeline, its virtualenv and data
+    "ml/**",
   ]),
 ]);
 

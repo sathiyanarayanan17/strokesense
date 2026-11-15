@@ -2,7 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { median } from "@/lib/math";
-import { scoreSpeech, TARGET_SENTENCE, type BystanderAnswer, type EnergySample } from "@/lib/scoring/speech";
+import { analyseSpeech, startPcmCapture } from "@/lib/ml/capture";
+import { SPEECH_MODEL } from "@/lib/ml/speech-model";
+import {
+  normalizeWords,
+  scoreSpeech,
+  TARGET_SENTENCE,
+  type BystanderAnswer,
+  type EnergySample,
+} from "@/lib/scoring/speech";
 import type { TestResult } from "@/lib/scoring/types";
 import { speak, stopSpeaking } from "@/lib/voice";
 import { PhaseTimer } from "./CameraStage";
@@ -49,6 +57,7 @@ export function SpeechTest({ onComplete }: { onComplete: (r: TestResult) => void
   const finalTranscript = useRef<string | null>("");
   const cleanup = useRef<(() => void) | null>(null);
   const stageRef = useRef<Stage>("ready");
+  const modelResult = useRef<Promise<number | null>>(Promise.resolve(null));
 
   useEffect(() => () => cleanup.current?.(), []);
 
@@ -63,11 +72,13 @@ export function SpeechTest({ onComplete }: { onComplete: (r: TestResult) => void
     energy.current = [];
     noise.current = [];
     finalTranscript.current = "";
+    modelResult.current = Promise.resolve(null);
 
     let stream: MediaStream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true },
+        // Raw-ish audio: the speech model was trained on unprocessed recordings.
+        audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false },
       });
     } catch {
       setError("Microphone permission was denied. Allow microphone access, or answer the question below.");
@@ -77,6 +88,11 @@ export function SpeechTest({ onComplete }: { onComplete: (r: TestResult) => void
 
     const audioCtx = new AudioContext();
     const source = audioCtx.createMediaStreamSource(stream);
+    // The speech model is optional: if the worklet can't start, the other checks still run.
+    const capture = await startPcmCapture(audioCtx, source).catch((e) => {
+      console.warn("Speech model capture unavailable", e);
+      return null;
+    });
     const analyser = audioCtx.createAnalyser();
     analyser.fftSize = 1024;
     source.connect(analyser);
@@ -111,6 +127,7 @@ export function SpeechTest({ onComplete }: { onComplete: (r: TestResult) => void
       cancelAnimationFrame(raf);
       clearTimeout(finishTimer);
       recognition?.abort();
+      capture?.dispose();
       stream.getTracks().forEach((tr) => tr.stop());
       void audioCtx.close();
     };
@@ -118,6 +135,15 @@ export function SpeechTest({ onComplete }: { onComplete: (r: TestResult) => void
 
     const finish = () => {
       if (stageRef.current !== "listening") return;
+      if (capture) {
+        const samples = capture.stop();
+        modelResult.current = analyseSpeech(samples, audioCtx.sampleRate, normalizeWords(TARGET_SENTENCE).length).catch(
+          (e) => {
+            console.warn("Speech model failed", e);
+            return null;
+          },
+        );
+      }
       stopAll();
       go("ask");
       speak("Did their speech sound slurred or strange?");
@@ -128,6 +154,7 @@ export function SpeechTest({ onComplete }: { onComplete: (r: TestResult) => void
     const beginListening = () => {
       if (stopped || stageRef.current !== "prompting") return;
       go("listening");
+      capture?.start();
 
       if (Ctor) {
         recognition = new Ctor();
@@ -170,13 +197,16 @@ export function SpeechTest({ onComplete }: { onComplete: (r: TestResult) => void
     }, CALIBRATE_MS);
   }
 
-  function answer(bystander: BystanderAnswer) {
+  async function answer(bystander: BystanderAnswer) {
     cleanup.current?.();
+    const modelProbability = await modelResult.current;
     const result = scoreSpeech({
       transcript: finalTranscript.current,
       energy: energy.current,
       noiseFloor: noise.current.length ? median(noise.current) : 0,
       bystander,
+      modelProbability,
+      modelThreshold: SPEECH_MODEL.threshold,
     });
     onComplete(result);
   }
@@ -259,7 +289,7 @@ export function SpeechTest({ onComplete }: { onComplete: (r: TestResult) => void
           </fieldset>
         )}
         <p className="max-w-md text-center text-xs text-slate-500">
-          Audio levels are analysed on this device. Word transcription uses your browser&apos;s built-in speech service.
+          Audio levels and the trained speech model run on this device. Word transcription uses your browser&apos;s built-in speech service.
         </p>
       </div>
     </TestShell>
