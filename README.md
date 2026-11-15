@@ -1,5 +1,7 @@
 # StrokeSense — spot a stroke in 60 seconds, with just a phone
 
+[![CI](https://github.com/sathiyanarayanan17/strokesense/actions/workflows/ci.yml/badge.svg)](https://github.com/sathiyanarayanan17/strokesense/actions/workflows/ci.yml)
+
 StrokeSense is a browser app that guides a bystander through the **BE-FAST** stroke check (Balance, Eyes, Face,
 Arms, Speech, Time). It uses on-device AI to *measure* the warning signs from the phone's camera and microphone,
 tells the family clearly when to call an ambulance, and creates a handoff report the emergency team can scan.
