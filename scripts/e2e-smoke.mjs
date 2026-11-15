@@ -76,7 +76,7 @@ try {
   const headline = (await heading.innerText()).trim();
   if (headline === "No warning signs detected") throw new Error("skipped checks produced an all-clear");
   ok(`results: skipped checks never produce an all-clear ("${headline}")`);
-  const speechCard = page.locator("li").filter({ hasText: "Speech" }).first();
+  const speechCard = page.locator("li").filter({ hasText: "Clinical details" }).filter({ hasText: "Speech" }).first();
   await speechCard.getByText("Clinical details").click();
   console.log(`    speech finding for the fake-mic tone: ${(await speechCard.innerText()).split("\n").slice(0, 6).join(" | ")}`);
 

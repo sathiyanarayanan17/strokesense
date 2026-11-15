@@ -123,13 +123,14 @@ export function SpeechTest({ onComplete }: { onComplete: (r: TestResult) => void
     let stopped = false;
 
     const stopAll = () => {
+      if (stopped) return; // runs once: finish() and answer() both call it
       stopped = true;
       cancelAnimationFrame(raf);
       clearTimeout(finishTimer);
       recognition?.abort();
       capture?.dispose();
       stream.getTracks().forEach((tr) => tr.stop());
-      void audioCtx.close();
+      if (audioCtx.state !== "closed") audioCtx.close().catch(() => {});
     };
     cleanup.current = stopAll;
 
