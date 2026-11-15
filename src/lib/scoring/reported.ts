@@ -37,3 +37,28 @@ export function scoreReported(test: ReportedTest, answer: ReportedAnswer): TestR
     },
   };
 }
+
+const SEVERITY: Record<TestResult["finding"], number> = { inconclusive: 0, normal: 1, borderline: 2, abnormal: 3 };
+
+/**
+ * Combines two results for the same BE-FAST item (e.g. what the bystander
+ * reported and what the camera measured). The more severe finding wins; an
+ * inconclusive part never hides the other part.
+ */
+export function mergeResults(a: TestResult, b: TestResult): TestResult {
+  if (a.test !== b.test) throw new Error(`cannot merge ${a.test} with ${b.test}`);
+  const [hi, lo] = SEVERITY[a.finding] >= SEVERITY[b.finding] ? [a, b] : [b, a];
+  return {
+    test: a.test,
+    finding: hi.finding,
+    score: Math.max(a.score, b.score),
+    weakerSide: hi.weakerSide ?? lo.weakerSide,
+    summary: `${hi.summary} ${lo.summary}`.slice(0, 300),
+    metrics: { ...lo.metrics, ...hi.metrics },
+    quality: {
+      validSamples: a.quality.validSamples + b.quality.validSamples,
+      totalSamples: a.quality.totalSamples + b.quality.totalSamples,
+      notes: [...new Set([...hi.quality.notes, ...lo.quality.notes])],
+    },
+  };
+}

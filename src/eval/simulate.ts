@@ -8,6 +8,8 @@
  */
 import { FACE_LANDMARKS as FL, type FaceFrame } from "../lib/scoring/face";
 import { POSE_LANDMARKS as PL, type ArmFrame, type PosePoint } from "../lib/scoring/arm";
+import { BALANCE_LANDMARKS as BL, type BalanceFrame, type BalancePoint } from "../lib/scoring/balance";
+import { GAZE_LANDMARKS as GL, type GazeFrame, type GazePhase } from "../lib/scoring/gaze";
 import type { Vec2 } from "../lib/math";
 
 /** Seeded PRNG (mulberry32) so every run produces identical numbers. */
@@ -123,4 +125,71 @@ export function wilson(successes: number, n: number): [number, number] {
   const centre = (p + (z * z) / (2 * n)) / denom;
   const half = (z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n))) / denom;
   return [Math.max(0, centre - half), Math.min(1, centre + half)];
+}
+
+// ---------- Balance ----------
+
+export interface BalanceCase {
+  swayAmp: number; // lateral sway amplitude, torso lengths
+  swayHz: number;
+  tiltDeg: number;
+  stepAtMs?: number;
+  jitterPx: number; // landmark noise σ with a 200 px torso
+  fps: number;
+}
+
+export function simulateBalance(c: BalanceCase, r: Rng, ms = 10_000): BalanceFrame[] {
+  const out: BalanceFrame[] = [];
+  const phase = r.uniform(0, 2 * Math.PI);
+  const lean = Math.tan((c.tiltDeg * Math.PI) / 180) * 200;
+  for (let i = 0; i * (1000 / c.fps) <= ms; i++) {
+    const t = i * (1000 / c.fps);
+    // Body sway = slow sinusoid + small random drift, like real postural sway.
+    const dx = (c.swayAmp * Math.sin((2 * Math.PI * c.swayHz * t) / 1000 + phase) + r.gauss(c.swayAmp * 0.15)) * 200;
+    const j = () => r.gauss(c.jitterPx);
+    const p = (x: number, y: number): BalancePoint => ({ x: x + j(), y: y + j(), visibility: 0.9 });
+    const pts: BalancePoint[] = Array.from({ length: 33 }, () => ({ x: 0, y: 0, visibility: 0.9 }));
+    pts[BL.leftShoulder] = p(560 + dx + lean, 200);
+    pts[BL.rightShoulder] = p(440 + dx + lean, 200);
+    pts[BL.leftHip] = p(540 + dx, 400);
+    pts[BL.rightHip] = p(460 + dx, 400);
+    const stepped = c.stepAtMs !== undefined && t >= c.stepAtMs;
+    pts[BL.leftAnkle] = p(510 + (stepped ? 70 : 0), 700);
+    pts[BL.rightAnkle] = p(490, 700);
+    out.push({ t, points: pts });
+  }
+  return out;
+}
+
+// ---------- Gaze ----------
+
+export interface GazeCase {
+  restDeviation: number; // eye widths toward the person's left (+) or right (-)
+  toLeft: number; // eye excursion when looking left
+  toRight: number;
+  irisJitterPx: number; // with a 60 px wide eye
+  framesPerPhase: number;
+}
+
+export function simulateGaze(c: GazeCase, r: Rng): GazeFrame[] {
+  const frames: GazeFrame[] = [];
+  const add = (phase: GazePhase, g: number) => {
+    for (let i = 0; i < c.framesPerPhase; i++) {
+      const pts: Vec2[] = Array.from({ length: 478 }, () => ({ x: 500, y: 400 }));
+      const j = () => r.gauss(c.irisJitterPx);
+      const yaw = r.gauss(2);
+      pts[GL.rightEyeOuter] = { x: 380 + j() * 0.3, y: 300 };
+      pts[GL.rightEyeInner] = { x: 440 + j() * 0.3, y: 300 };
+      pts[GL.leftEyeInner] = { x: 560 + j() * 0.3, y: 300 };
+      pts[GL.leftEyeOuter] = { x: 620 + j() * 0.3, y: 300 };
+      pts[GL.rightIris] = { x: 410 + g * 60 + j(), y: 300 + j() };
+      pts[GL.leftIris] = { x: 590 + g * 60 + j(), y: 300 + j() };
+      pts[GL.noseTip] = { x: 500 + yaw, y: 380 };
+      frames.push({ phase, points: pts });
+    }
+  };
+  add("centre", c.restDeviation);
+  add("left", c.restDeviation + c.toLeft);
+  add("right", c.restDeviation - c.toRight);
+  return frames;
 }

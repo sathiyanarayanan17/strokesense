@@ -6,8 +6,8 @@ import { assessRisk, describeOnset } from "@/lib/scoring/risk";
 import type { Finding, TestId, TestResult } from "@/lib/scoring/types";
 
 const NAMES: Record<TestId, string> = {
-  balance: "B · Balance (reported)",
-  eyes: "E · Eyes / vision (reported)",
+  balance: "B · Balance (reported + camera sway)",
+  eyes: "E · Eyes (reported + iris tracking)",
   face: "F · Facial droop (camera)",
   arm: "A · Arm drift (camera)",
   speech: "S · Speech (microphone + bystander)",
@@ -134,7 +134,7 @@ function Report({ report }: { report: ReportData }) {
           Face and arm findings come from on-device landmark tracking (MediaPipe). Facial asymmetry is the relative
           difference in mouth-corner excursion from rest to smile; arm drift is the change in wrist height relative to
           the shoulder line over a 10-second hold, in shoulder-width units. Speech combines word error rate on the
-          Cincinnati sentence, pause ratio and bystander judgement. Balance and vision are reported by the bystander.
+          Cincinnati sentence, pause ratio and bystander judgement. Balance combines the bystander report with lateral sway, trunk tilt and stepping from body tracking; eyes combine the report with iris-tracked gaze excursion and resting deviation.
           Thresholds are provisional and not clinically validated. This screen supports, and does not replace, clinical
           assessment (e.g. NIHSS) and imaging. &ldquo;Left&rdquo; and &ldquo;right&rdquo; refer to the patient&apos;s own sides.
         </p>

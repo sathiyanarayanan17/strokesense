@@ -1,9 +1,11 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { scoreArms, ARM_THRESHOLDS } from "../lib/scoring/arm";
+import { scoreBalance, BALANCE_THRESHOLDS } from "../lib/scoring/balance";
 import { scoreFace, FACE_THRESHOLDS } from "../lib/scoring/face";
+import { scoreGaze, GAZE_THRESHOLDS } from "../lib/scoring/gaze";
 import type { Finding, TestResult } from "../lib/scoring/types";
-import { rng, simulateArms, simulateFace, wilson, type Rng } from "./simulate";
+import { rng, simulateArms, simulateBalance, simulateFace, simulateGaze, wilson, type Rng } from "./simulate";
 
 /**
  * Run with `npm run eval`. Writes docs/EVALUATION.md.
@@ -31,13 +33,14 @@ interface Row {
 
 function evaluate(
   condition: string,
-  makePositive: (r: Rng) => { result: TestResult; side: "left" | "right" },
+  makePositive: (r: Rng) => { result: TestResult; side: "left" | "right" | null },
   makeNegative: (r: Rng) => TestResult,
   seed: number,
 ): Row {
   const r = rng(seed);
   let tp = 0;
   let sideOk = 0;
+  let sideN = 0;
   let tn = 0;
   let inc = 0;
   for (let i = 0; i < N; i++) {
@@ -45,7 +48,10 @@ function evaluate(
     if (result.finding === "inconclusive") inc++;
     if (flagged(result.finding)) {
       tp++;
-      if (result.weakerSide === side) sideOk++;
+      if (side !== null) {
+        sideN++;
+        if (result.weakerSide === side) sideOk++;
+      }
     }
     const neg = makeNegative(r);
     if (neg.finding === "inconclusive") inc++;
@@ -56,7 +62,7 @@ function evaluate(
     sens: ci(tp, N),
     spec: ci(tn, N),
     inconclusive: pct(inc / (2 * N)),
-    sideCorrect: tp ? pct(sideOk / tp) : "—",
+    sideCorrect: sideN ? pct(sideOk / sideN) : "—",
     raw: { tp, pos: N, tn, neg: N },
   };
 }
@@ -155,6 +161,125 @@ function armSeverityCurve(): Array<{ drift: string; flagged: string }> {
   });
 }
 
+/** Eyes: detection rate by weak-side movement (as a fraction of the strong side), 2 px iris jitter. */
+function gazeSeverityCurve(): Array<{ ratio: string; flagged: string }> {
+  const r = rng(SEED + 700);
+  return [1, 0.8, 0.6, 0.5, 0.4, 0.3, 0.2, 0].map((ratio) => {
+    let f = 0;
+    for (let i = 0; i < N; i++) {
+      const strong = r.uniform(0.15, 0.3);
+      const weakLeft = r.next() < 0.5;
+      const res = scoreGaze(
+        simulateGaze(
+          {
+            restDeviation: r.gauss(0.03),
+            toLeft: weakLeft ? strong * ratio : strong,
+            toRight: weakLeft ? strong : strong * ratio,
+            irisJitterPx: 2,
+            framesPerPhase: 15,
+          },
+          r,
+        ),
+      );
+      if (flagged(res.finding)) f++;
+    }
+    return { ratio: `${Math.round(ratio * 100)}%`, flagged: pct(f / N) };
+  });
+}
+
+/** Balance: positives sway strongly, lean, or step; negatives stand with normal small sway. */
+const BALANCE_CONDITIONS = [
+  { name: "Typical phone (2 px jitter, 30 fps)", jitter: 2, fps: 30 },
+  { name: "Hard (4 px jitter, 15 fps)", jitter: 4, fps: 15 },
+];
+
+function balanceRows(): Row[] {
+  return BALANCE_CONDITIONS.map((c, i) =>
+    evaluate(
+      c.name,
+      (r) => {
+        const kind = r.next();
+        const tiltSign = r.next() < 0.5 ? -1 : 1;
+        const res = scoreBalance(
+          simulateBalance(
+            {
+              swayAmp: kind < 0.4 ? r.uniform(0.1, 0.18) : r.uniform(0, 0.02),
+              swayHz: r.uniform(0.2, 0.6),
+              tiltDeg: kind >= 0.4 && kind < 0.75 ? tiltSign * r.uniform(12, 18) : r.uniform(-2, 2),
+              stepAtMs: kind >= 0.75 ? r.uniform(3000, 8000) : undefined,
+              jitterPx: c.jitter,
+              fps: c.fps,
+            },
+            r,
+          ),
+        );
+        // Only leans have a side.
+        const isLean = kind >= 0.4 && kind < 0.75;
+        return { result: res, side: isLean ? (tiltSign > 0 ? "left" : "right") : null };
+      },
+      (r) =>
+        scoreBalance(
+          simulateBalance(
+            { swayAmp: r.uniform(0, 0.025), swayHz: r.uniform(0.1, 0.4), tiltDeg: r.uniform(-3, 3), jitterPx: c.jitter, fps: c.fps },
+            r,
+          ),
+        ),
+      SEED + 200 + i,
+    ),
+  );
+}
+
+/** Eyes: positives have a one-sided gaze palsy or resting deviation; negatives move evenly. */
+const GAZE_CONDITIONS = [
+  { name: "Typical (1 px iris jitter)", jitter: 1 },
+  { name: "Noisy (2 px iris jitter)", jitter: 2 },
+  { name: "Very noisy (3 px iris jitter)", jitter: 3 },
+];
+
+function gazeRows(): Row[] {
+  return GAZE_CONDITIONS.map((c, i) =>
+    evaluate(
+      c.name,
+      (r) => {
+        const strong = r.uniform(0.15, 0.3);
+        const palsy = r.next() < 0.6;
+        const weakLeft = r.next() < 0.5;
+        const weak = strong * r.uniform(0, 0.25);
+        const r0 = (r.next() < 0.5 ? -1 : 1) * r.uniform(0.22, 0.35);
+        const res = scoreGaze(
+          simulateGaze(
+            {
+              restDeviation: palsy ? r.gauss(0.02) : r0,
+              toLeft: palsy && weakLeft ? weak : strong,
+              toRight: palsy && !weakLeft ? weak : strong,
+              irisJitterPx: c.jitter,
+              framesPerPhase: 15,
+            },
+            r,
+          ),
+        );
+        return { result: res, side: palsy ? (weakLeft ? "left" : "right") : (r0 > 0 ? "left" : "right") };
+      },
+      (r) => {
+        const base = r.uniform(0.15, 0.3);
+        return scoreGaze(
+          simulateGaze(
+            {
+              restDeviation: r.gauss(0.03),
+              toLeft: base * r.uniform(0.8, 1),
+              toRight: base * r.uniform(0.8, 1),
+              irisJitterPx: c.jitter,
+              framesPerPhase: 15,
+            },
+            r,
+          ),
+        );
+      },
+      SEED + 300 + i,
+    ),
+  );
+}
+
 function table(rows: Row[]): string {
   return [
     "| Condition | Sensitivity (95% CI) | Specificity (95% CI) | Inconclusive | Weaker side correct |",
@@ -169,6 +294,9 @@ describe("synthetic robustness evaluation", () => {
     const arms = armRows();
     const curve = faceSeverityCurve();
     const armCurve = armSeverityCurve();
+    const balance = balanceRows();
+    const gaze = gazeRows();
+    const gazeCurve = gazeSeverityCurve();
 
     const md = `# StrokeSense — synthetic robustness evaluation
 
@@ -216,10 +344,33 @@ threshold (${ARM_THRESHOLDS.driftBorderline} shoulder widths), where mild drift 
 |---|---|
 ${armCurve.map((c) => `| ${c.drift} | ${c.flagged} |`).join("\n")}
 
+## Balance (standing sway)
+
+Positives: strong lateral sway (0.10–0.18 torso lengths), a lean of 12–18°, or a step during the 10 s stand.
+Negatives: normal small sway (≤ 0.025 torso lengths) and ≤ 3° posture asymmetry. "Weaker side" applies to leans only.
+
+${table(balance)}
+
+## Eyes (gaze following)
+
+Positives: one-sided gaze palsy (the weak side moves 0–25% as far as the strong side) or resting deviation of
+0.22–0.35 eye widths. Negatives: both sides within 20% of each other, small resting offset. Iris jitter is the main
+error source for phone cameras; real-world accuracy must be confirmed with recordings.
+
+${table(gaze)}
+
+### Detection rate by weak-side eye movement (2 px iris jitter)
+
+| Weak side moves (% of strong side) | Flagged |
+|---|---|
+${gazeCurve.map((c) => `| ${c.ratio} | ${c.flagged} |`).join("\n")}
+
 ## Thresholds under test
 
 - Face: excursion asymmetry ≥ ${FACE_THRESHOLDS.eaiBorderline} borderline, ≥ ${FACE_THRESHOLDS.eaiAbnormal} abnormal; smile droop ≥ ${FACE_THRESHOLDS.droopBorderline} / ${FACE_THRESHOLDS.droopAbnormal} inter-ocular units; frames with head turn > ${FACE_THRESHOLDS.maxYaw} rejected.
 - Arms: one-sided drift ≥ ${ARM_THRESHOLDS.driftBorderline} borderline, ≥ ${ARM_THRESHOLDS.driftAbnormal} abnormal (shoulder widths); wrist below ${ARM_THRESHOLDS.raiseFailHeight} at start = arm could not be raised.
+- Balance: sway RMS ≥ ${BALANCE_THRESHOLDS.rmsBorderline} / ${BALANCE_THRESHOLDS.rmsAbnormal} torso lengths (0.5 s low-pass); trunk tilt ≥ ${BALANCE_THRESHOLDS.tiltBorderlineDeg}° / ${BALANCE_THRESHOLDS.tiltAbnormalDeg}°; smoothed ankle movement ≥ ${BALANCE_THRESHOLDS.stepDistance} = a step. Sway *velocity* is reported but no longer used for decisions: an earlier version of this evaluation showed it flagged 100% of healthy simulated people under noisy-camera conditions.
+- Eyes: weak/strong excursion ratio < ${GAZE_THRESHOLDS.palsyBorderline} / ${GAZE_THRESHOLDS.palsyAbnormal}; resting deviation ≥ ${GAZE_THRESHOLDS.deviationBorderline} / ${GAZE_THRESHOLDS.deviationAbnormal} eye widths; frames with head turn > ${GAZE_THRESHOLDS.maxHeadYaw} rejected.
 
 Speech is not included: word error rate depends on the browser's speech recogniser, which cannot be meaningfully
 simulated. It should be evaluated with recordings (e.g. the TORGO dysarthric speech corpus).

@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 const STEPS = [
-  { letter: "B", title: "Balance", text: "A quick question about sudden loss of balance, dizziness or trouble walking." },
-  { letter: "E", title: "Eyes", text: "A quick question about sudden vision loss or double vision." },
+  { letter: "B", title: "Balance", text: "Body tracking measures sway, leaning and stepping while the person stands still." },
+  { letter: "E", title: "Eyes", text: "Iris tracking checks that both eyes can follow a target to each side." },
   { letter: "F", title: "Face", text: "Face-mesh tracking measures how evenly each side of the mouth moves when smiling." },
   { letter: "A", title: "Arms", text: "Body-pose tracking detects one arm drifting down — a camera version of the pronator-drift test." },
   { letter: "S", title: "Speech", text: "Checks a standard sentence for wrong words, slurring and pauses, plus your own judgement." },

@@ -43,7 +43,25 @@ try {
     await group.getByRole("button", { name: "No", exact: true }).click();
   }
   await page.getByRole("button", { name: "Continue to camera checks" }).click();
-  ok("balance and eyes answered");
+  ok("balance and eyes questions answered");
+
+  // Balance: pass the safety step, wait for the body model, then skip (a fake camera has no person).
+  await page.getByRole("button", { name: /they can stand/ }).click();
+  await page.getByRole("button", { name: "Start balance check" }).waitFor({ timeout: 60_000 });
+  await page.waitForFunction(() => {
+    const b = [...document.querySelectorAll("button")].find((x) => x.textContent === "Start balance check");
+    return b && !b.disabled;
+  }, null, { timeout: 60_000 });
+  ok("balance step: pose model loaded, camera attached after safety step");
+  await page.getByRole("button", { name: /Skip it/ }).click();
+
+  await page.getByRole("button", { name: "Start eye check" }).waitFor({ timeout: 60_000 });
+  await page.waitForFunction(() => {
+    const b = [...document.querySelectorAll("button")].find((x) => x.textContent === "Start eye check");
+    return b && !b.disabled;
+  }, null, { timeout: 60_000 });
+  ok("eye step: face model loaded");
+  await page.getByRole("button", { name: /Skip it/ }).click();
 
   // Face model: the badge leaves "Loading model…" once MediaPipe is ready.
   await page.getByText(/Looking for a face…|Face tracked|Face the camera directly/).waitFor({ timeout: 60_000 });

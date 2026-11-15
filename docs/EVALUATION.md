@@ -67,10 +67,47 @@ threshold (0.12 shoulder widths), where mild drift is caught only part of the ti
 | 0.25 | 100.0% |
 | 0.40 | 100.0% |
 
+## Balance (standing sway)
+
+Positives: strong lateral sway (0.10–0.18 torso lengths), a lean of 12–18°, or a step during the 10 s stand.
+Negatives: normal small sway (≤ 0.025 torso lengths) and ≤ 3° posture asymmetry. "Weaker side" applies to leans only.
+
+| Condition | Sensitivity (95% CI) | Specificity (95% CI) | Inconclusive | Weaker side correct |
+|---|---|---|---|---|
+| Typical phone (2 px jitter, 30 fps) | 100.0% (99.0%–100.0%) | 100.0% (99.0%–100.0%) | 0.0% | 100.0% |
+| Hard (4 px jitter, 15 fps) | 100.0% (99.0%–100.0%) | 99.0% (97.5%–99.6%) | 0.0% | 100.0% |
+
+## Eyes (gaze following)
+
+Positives: one-sided gaze palsy (the weak side moves 0–25% as far as the strong side) or resting deviation of
+0.22–0.35 eye widths. Negatives: both sides within 20% of each other, small resting offset. Iris jitter is the main
+error source for phone cameras; real-world accuracy must be confirmed with recordings.
+
+| Condition | Sensitivity (95% CI) | Specificity (95% CI) | Inconclusive | Weaker side correct |
+|---|---|---|---|---|
+| Typical (1 px iris jitter) | 100.0% (99.0%–100.0%) | 100.0% (99.0%–100.0%) | 0.0% | 100.0% |
+| Noisy (2 px iris jitter) | 100.0% (99.0%–100.0%) | 100.0% (99.0%–100.0%) | 0.0% | 100.0% |
+| Very noisy (3 px iris jitter) | 99.8% (98.6%–100.0%) | 99.8% (98.6%–100.0%) | 0.0% | 100.0% |
+
+### Detection rate by weak-side eye movement (2 px iris jitter)
+
+| Weak side moves (% of strong side) | Flagged |
+|---|---|
+| 100% | 0.0% |
+| 80% | 0.0% |
+| 60% | 5.5% |
+| 50% | 47.3% |
+| 40% | 92.5% |
+| 30% | 99.0% |
+| 20% | 100.0% |
+| 0% | 100.0% |
+
 ## Thresholds under test
 
 - Face: excursion asymmetry ≥ 0.2 borderline, ≥ 0.35 abnormal; smile droop ≥ 0.06 / 0.1 inter-ocular units; frames with head turn > 0.12 rejected.
 - Arms: one-sided drift ≥ 0.12 borderline, ≥ 0.22 abnormal (shoulder widths); wrist below -0.6 at start = arm could not be raised.
+- Balance: sway RMS ≥ 0.04 / 0.07 torso lengths (0.5 s low-pass); trunk tilt ≥ 7° / 11°; smoothed ankle movement ≥ 0.25 = a step. Sway *velocity* is reported but no longer used for decisions: an earlier version of this evaluation showed it flagged 100% of healthy simulated people under noisy-camera conditions.
+- Eyes: weak/strong excursion ratio < 0.5 / 0.3; resting deviation ≥ 0.12 / 0.2 eye widths; frames with head turn > 0.12 rejected.
 
 Speech is not included: word error rate depends on the browser's speech recogniser, which cannot be meaningfully
 simulated. It should be evaluated with recordings (e.g. the TORGO dysarthric speech corpus).

@@ -68,8 +68,8 @@ const en: Dict = {
   },
   explain: {
     speech: "Speech may be slurred, or some words may be wrong.",
-    balance: "A sudden balance problem was reported.",
-    eyes: "A sudden vision problem was reported.",
+    balance: "A balance problem was reported or measured.",
+    eyes: "An eye or vision problem was reported or measured.",
   },
   normal: "No warning sign was found in this check.",
   inconclusive: "This check could not be completed.",
@@ -118,8 +118,8 @@ const hi: Dict = {
   },
   explain: {
     speech: "बोली अस्पष्ट हो सकती है, या कुछ शब्द गलत हो सकते हैं।",
-    balance: "अचानक संतुलन बिगड़ने की बात बताई गई।",
-    eyes: "अचानक देखने में समस्या की बात बताई गई।",
+    balance: "संतुलन में समस्या बताई गई या मापी गई।",
+    eyes: "आंखों या देखने में समस्या बताई गई या मापी गई।",
   },
   normal: "इस जांच में कोई चेतावनी संकेत नहीं मिला।",
   inconclusive: "यह जांच पूरी नहीं हो सकी।",
@@ -168,8 +168,8 @@ const ta: Dict = {
   },
   explain: {
     speech: "பேச்சு குழறலாக இருக்கலாம், அல்லது சில வார்த்தைகள் தவறாக இருக்கலாம்.",
-    balance: "திடீர் சமநிலை இழப்பு தெரிவிக்கப்பட்டது.",
-    eyes: "திடீர் பார்வை பிரச்சனை தெரிவிக்கப்பட்டது.",
+    balance: "சமநிலை பிரச்சனை தெரிவிக்கப்பட்டது அல்லது அளவிடப்பட்டது.",
+    eyes: "கண் அல்லது பார்வை பிரச்சனை தெரிவிக்கப்பட்டது அல்லது அளவிடப்பட்டது.",
   },
   normal: "இந்தச் சோதனையில் எச்சரிக்கை அறிகுறி எதுவும் இல்லை.",
   inconclusive: "இந்தச் சோதனையை முடிக்க முடியவில்லை.",
