@@ -78,6 +78,7 @@ npm run eval         # synthetic robustness evaluation â†’ docs/EVALUATION.
 npm run build && npm start   # then, in another terminal:
 npm run e2e          # end-to-end test in headless Edge with a fake camera (BROWSER=chrome to use Chrome)
 npm run lint
+cd python && pip install -e ".[dev]" && python -m pytest   # Python port of the scoring engine (53 tests)
 ```
 
 ### Evaluation summary ([full report](docs/EVALUATION.md))
@@ -114,6 +115,8 @@ src/components/report/   clinician handoff report
 src/lib/scoring/         face, arm, speech, reported symptoms, risk engine (+ tests)
 src/lib/                 report encoding, hospitals, i18n, vision loader, voice
 src/eval/                synthetic robustness evaluation
+ml/                      speech-model training on TORGO (see docs/SPEECH_MODEL.md)
+python/                  Python port of the scoring engine, with tests
 scripts/                 asset setup, E2E smoke test, code export
 public/sw.js             offline service worker
 ```
