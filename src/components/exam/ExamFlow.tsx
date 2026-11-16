@@ -68,7 +68,7 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export function ExamFlow() {
+export function ExamFlow({ practice = false }: { practice?: boolean }) {
   const [state, dispatch] = useReducer(reducer, initial);
   const record = (...results: TestResult[]) => {
     stopSpeaking();
@@ -81,6 +81,11 @@ export function ExamFlow() {
   return (
     <CameraProvider active={cameraActive}>
     <div className="space-y-8">
+      {practice && state.step !== "results" && (
+        <p className="rounded-2xl border-2 border-dashed border-slate-400 bg-slate-50 p-3 text-center text-sm font-semibold text-slate-800" role="note">
+          Practice mode: try the steps on a calm day. Nothing is saved or shared.
+        </p>
+      )}
       <Stepper current={state.step} />
 
       {state.step === "onset" && <OnsetStep onDone={(lastKnownWell) => dispatch({ type: "onset", lastKnownWell })} />}
@@ -96,6 +101,7 @@ export function ExamFlow() {
           lastKnownWell={state.lastKnownWell}
           completedAt={state.completedAt ?? 0}
           onRestart={() => dispatch({ type: "restart" })}
+          practice={practice}
         />
       )}
 

@@ -1,11 +1,14 @@
 "use client";
 
+import { isVoiceEnabled } from "./prefs";
+
 /**
  * Spoken instructions, so a panicking bystander doesn't need to read the screen.
  * `onEnd` fires once when speech finishes, or after a fallback timeout because
  * some browsers never emit `end` (or have no voices installed).
+ * Guidance is silent when the user turned voice off, unless `force` is set (an explicit "read aloud" tap).
  */
-export function speak(text: string, onEnd?: () => void, fallbackMs = 5000, lang?: string) {
+export function speak(text: string, onEnd?: () => void, fallbackMs = 5000, lang?: string, force = false) {
   let fired = false;
   const done = () => {
     if (fired) return;
@@ -13,7 +16,7 @@ export function speak(text: string, onEnd?: () => void, fallbackMs = 5000, lang?
     onEnd?.();
   };
 
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+  if (typeof window === "undefined" || !("speechSynthesis" in window) || (!force && !isVoiceEnabled())) {
     if (onEnd) setTimeout(done, 0);
     return;
   }

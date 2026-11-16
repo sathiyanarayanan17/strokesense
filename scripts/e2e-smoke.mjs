@@ -15,6 +15,19 @@ const ok = (name) => {
   console.log(`  ✓ ${name}`);
 };
 
+// Automated accessibility scan (axe-core). Serious and critical violations fail the run.
+async function a11y(page, label) {
+  await page.addScriptTag({ path: "node_modules/axe-core/axe.min.js" });
+  const violations = await page.evaluate(async () => {
+    const r = await window.axe.run(document, { resultTypes: ["violations"] });
+    return r.violations
+      .filter((v) => v.impact === "serious" || v.impact === "critical")
+      .map((v) => `${v.id} (${v.impact}): ${v.nodes.length} node(s), e.g. ${v.nodes[0].target.join(" ")}`);
+  });
+  if (violations.length) throw new Error(`accessibility violations on ${label}:\n  ${violations.join("\n  ")}`);
+  ok(`accessibility scan clean: ${label}`);
+}
+
 const browser = await chromium.launch({
   channel,
   headless: true,
@@ -33,6 +46,7 @@ try {
   await page.goto(`${BASE}/`);
   await page.getByRole("heading", { name: /Spot a stroke in 60 seconds/ }).waitFor();
   ok("landing page renders");
+  await a11y(page, "landing page");
 
   await page.getByRole("link", { name: "Start stroke check" }).click();
   await page.getByText("When was the person last seen normal?").waitFor();
@@ -100,6 +114,9 @@ try {
 
   await page.getByAltText("QR code linking to the handoff report").waitFor({ timeout: 10_000 });
   ok("handoff QR code generated");
+  await a11y(page, "results screen");
+  await page.getByRole("button", { name: "Copy message" }).waitFor();
+  ok("copy-message fallback offered");
 
   await page.getByRole("button", { name: "हिन्दी" }).click();
   await page.getByText("जांच नहीं हुई").first().waitFor();
@@ -117,6 +134,12 @@ try {
   await page.getByRole("button", { name: /Larger text/ }).click();
   ok("larger-text option toggles");
 
+  // Country setting changes the emergency numbers everywhere.
+  await page.getByLabel("Country").selectOption("US");
+  await page.getByRole("link", { name: /911/ }).first().waitFor();
+  await page.getByLabel("Country").selectOption("");
+  ok("emergency number follows the country setting (US -> 911)");
+
   const reportUrl = await page.getByRole("link", { name: "Open report" }).getAttribute("href");
   const report = await context.newPage();
   await report.goto(reportUrl);
@@ -124,6 +147,12 @@ try {
   const rows = await report.locator("tbody tr").count();
   if (rows !== 5) throw new Error(`expected 5 BE-FAST rows in report, got ${rows}`);
   ok("handoff report opens from the link with all 5 BE-FAST items");
+
+  const practice = await context.newPage();
+  await practice.goto(`${BASE}/practice`);
+  await practice.getByText("Practice mode:").waitFor();
+  ok("practice mode page loads with its banner");
+  await practice.close();
 
   if (errors.length) throw new Error(`page errors: ${errors.join(" | ")}`);
   console.log(`\nE2E smoke test passed (${steps.length} checks).`);

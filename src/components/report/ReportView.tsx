@@ -128,6 +128,13 @@ function Report({ report }: { report: ReportData }) {
         </div>
       </section>
 
+      <section className="hidden rounded-2xl border border-slate-300 p-4 text-sm text-slate-700 print:block">
+        <h2 className="font-semibold text-slate-900">Handover notes (write by hand)</h2>
+        <p className="mt-2">Patient name / age: ______________________________________________</p>
+        <p className="mt-4">Medicines, allergies, conditions: ____________________________________</p>
+        <p className="mt-4">Contact number of family member: ______________________________</p>
+      </section>
+
       <section className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
         <h2 className="font-semibold text-slate-800">Method and limitations</h2>
         <p className="mt-1">

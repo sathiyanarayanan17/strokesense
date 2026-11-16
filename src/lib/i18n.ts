@@ -32,8 +32,9 @@ interface Dict {
   onsetUnknown: string;
   ago: (h: number, m: number) => string;
   onset: Record<OnsetWindow, string>;
-  call108: string;
-  call112: string;
+  /** Label for the main emergency number (ambulance) and for any additional number. */
+  callPrimary: (n: string) => string;
+  callOther: (n: string) => string;
   disclaimer: string;
   readAloud: string;
   noVoice: string;
@@ -48,6 +49,9 @@ interface Dict {
   shareLocating: string;
   shareLocationFailed: string;
   shareLocationAdded: string;
+  shareCopy: string;
+  shareCopied: string;
+  shareCopyFailed: string;
   shareMessage: (p: { headline: string; ago: string | null; reportUrl: string; mapUrl: string | null }) => string;
 }
 
@@ -93,8 +97,8 @@ const en: Dict = {
     day: "Some treatments may still be possible. Get to hospital without delay.",
     late: "Tell the medical team exactly when symptoms began.",
   },
-  call108: "Call 108 (Ambulance)",
-  call112: "Call 112 (Emergency)",
+  callPrimary: (n) => `Call ${n} (Ambulance)`,
+  callOther: (n) => `Call ${n} (Emergency)`,
   disclaimer:
     "StrokeSense is a screening aid, not a diagnosis. It can miss strokes and can raise false alarms. If in doubt, always call emergency services.",
   readAloud: "Read aloud",
@@ -116,6 +120,9 @@ const en: Dict = {
   shareLocating: "Getting your location…",
   shareLocationFailed: "Could not get your location. You can still send the message.",
   shareLocationAdded: "Location added to the message.",
+  shareCopy: "Copy message",
+  shareCopied: "Message copied. Paste it into any app.",
+  shareCopyFailed: "Could not copy. Use WhatsApp or SMS instead.",
   shareMessage: ({ headline, ago, reportUrl, mapUrl }) =>
     [
       `StrokeSense: ${headline}.`,
@@ -169,8 +176,8 @@ const hi: Dict = {
     day: "कुछ इलाज अब भी संभव हो सकते हैं। बिना देर किए अस्पताल पहुंचें।",
     late: "मेडिकल टीम को ठीक-ठीक बताएं कि लक्षण कब शुरू हुए।",
   },
-  call108: "108 पर कॉल करें (एम्बुलेंस)",
-  call112: "112 पर कॉल करें (आपातकाल)",
+  callPrimary: (n) => `${n} पर कॉल करें (एम्बुलेंस)`,
+  callOther: (n) => `${n} पर कॉल करें (आपातकाल)`,
   disclaimer:
     "StrokeSense केवल एक स्क्रीनिंग सहायक है, निदान नहीं। यह स्ट्रोक को चूक सकता है और गलत चेतावनी भी दे सकता है। शक हो तो हमेशा आपातकालीन सेवा को कॉल करें।",
   readAloud: "पढ़कर सुनाएं",
@@ -192,6 +199,9 @@ const hi: Dict = {
   shareLocating: "आपकी लोकेशन ली जा रही है…",
   shareLocationFailed: "लोकेशन नहीं मिल सकी। आप फिर भी संदेश भेज सकते हैं।",
   shareLocationAdded: "संदेश में लोकेशन जोड़ दी गई।",
+  shareCopy: "संदेश कॉपी करें",
+  shareCopied: "संदेश कॉपी हो गया। इसे किसी भी ऐप में पेस्ट करें।",
+  shareCopyFailed: "कॉपी नहीं हो सका। WhatsApp या SMS का उपयोग करें।",
   shareMessage: ({ headline, ago, reportUrl, mapUrl }) =>
     [
       `StrokeSense: ${headline}।`,
@@ -245,8 +255,8 @@ const ta: Dict = {
     day: "சில சிகிச்சைகள் இன்னும் சாத்தியமாக இருக்கலாம். தாமதமின்றி மருத்துவமனைக்குச் செல்லவும்.",
     late: "அறிகுறிகள் எப்போது தொடங்கின என்பதை மருத்துவக் குழுவிடம் சரியாகச் சொல்லவும்.",
   },
-  call108: "108 அழைக்கவும் (ஆம்புலன்ஸ்)",
-  call112: "112 அழைக்கவும் (அவசரம்)",
+  callPrimary: (n) => `${n} அழைக்கவும் (ஆம்புலன்ஸ்)`,
+  callOther: (n) => `${n} அழைக்கவும் (அவசரம்)`,
   disclaimer:
     "StrokeSense ஒரு முன்னோட்டப் பரிசோதனை உதவி மட்டுமே, நோயறிதல் அல்ல. இது பக்கவாதத்தைத் தவறவிடலாம் அல்லது தவறான எச்சரிக்கை தரலாம். சந்தேகம் இருந்தால் எப்போதும் அவசர சேவையை அழைக்கவும்.",
   readAloud: "சத்தமாகப் படிக்கவும்",
@@ -268,6 +278,9 @@ const ta: Dict = {
   shareLocating: "உங்கள் இருப்பிடம் பெறப்படுகிறது…",
   shareLocationFailed: "இருப்பிடத்தைப் பெற முடியவில்லை. இருந்தாலும் செய்தியை அனுப்பலாம்.",
   shareLocationAdded: "செய்தியில் இருப்பிடம் சேர்க்கப்பட்டது.",
+  shareCopy: "செய்தியை நகலெடு",
+  shareCopied: "செய்தி நகலெடுக்கப்பட்டது. எந்த செயலியிலும் ஒட்டலாம்.",
+  shareCopyFailed: "நகலெடுக்க முடியவில்லை. WhatsApp அல்லது SMS பயன்படுத்தவும்.",
   shareMessage: ({ headline, ago, reportUrl, mapUrl }) =>
     [
       `StrokeSense: ${headline}.`,

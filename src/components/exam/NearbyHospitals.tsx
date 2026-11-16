@@ -41,7 +41,7 @@ export function NearbyHospitals() {
         } catch (e) {
           if (!mounted.current) return;
           console.error(e);
-          setState({ kind: "error", message: "Hospital search is unavailable right now. Call 108 — the ambulance team knows the nearest stroke-ready hospital." });
+          setState({ kind: "error", message: "Hospital search is unavailable right now. Call your emergency number â€” the ambulance team knows the nearest stroke-ready hospital." });
         } finally {
           clearTimeout(timeout);
         }
@@ -72,7 +72,7 @@ export function NearbyHospitals() {
       )}
       {(state.kind === "locating" || state.kind === "searching") && (
         <p className="mt-4 text-slate-600" role="status">
-          {state.kind === "locating" ? "Getting your location…" : "Searching OpenStreetMap…"}
+          {state.kind === "locating" ? "Getting your locationâ€¦" : "Searching OpenStreetMapâ€¦"}
         </p>
       )}
       {state.kind === "error" && (
@@ -87,7 +87,7 @@ export function NearbyHospitals() {
       )}
       {state.kind === "done" &&
         (state.hospitals.length === 0 ? (
-          <p className="mt-4 text-slate-600">No hospitals found nearby on the map. Call 108.</p>
+          <p className="mt-4 text-slate-600">No hospitals found nearby on the map. Call your emergency number.</p>
         ) : (
           <ul className="mt-4 divide-y divide-slate-100">
             {state.hospitals.map((h) => (
@@ -96,7 +96,7 @@ export function NearbyHospitals() {
                   <p className="font-semibold text-slate-900">{h.name}</p>
                   <p className="text-sm text-slate-500">
                     {h.distanceKm.toFixed(1)} km away (straight line)
-                    {h.emergency ? " · emergency department mapped" : ""}
+                    {h.emergency ? " Â· emergency department mapped" : ""}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -118,8 +118,8 @@ export function NearbyHospitals() {
             ))}
           </ul>
         ))}
-      <p className="mt-3 text-xs text-slate-400">
-        Your location is sent only to OpenStreetMap&apos;s Overpass service to search for hospitals. Map data © OpenStreetMap contributors.
+      <p className="mt-3 text-xs text-slate-600">
+        Your location is sent only to OpenStreetMap&apos;s Overpass service to search for hospitals. Map data Â© OpenStreetMap contributors.
       </p>
     </section>
   );

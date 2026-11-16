@@ -48,7 +48,7 @@ export function ShareToContacts({ lang, headline, ago, reportUrl }: Props) {
           target="_blank"
           rel="noopener"
           aria-disabled={!text}
-          className={`${link} bg-emerald-600 hover:bg-emerald-700 ${text ? "" : "pointer-events-none opacity-50"}`}
+          className={`${link} bg-emerald-700 hover:bg-emerald-800 ${text ? "" : "pointer-events-none opacity-50"}`}
         >
           {d.shareWhatsapp}
         </a>
@@ -64,7 +64,22 @@ export function ShareToContacts({ lang, headline, ago, reportUrl }: Props) {
           onClick={addLocation}
           className="rounded-full border border-slate-300 px-5 py-3 font-semibold text-slate-800 hover:bg-slate-50"
         >
-          📍 {d.shareAddLocation}
+          ðŸ“ {d.shareAddLocation}
+        </button>
+        <button
+          type="button"
+          disabled={!text}
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(text!);
+              setStatus(d.shareCopied);
+            } catch {
+              setStatus(d.shareCopyFailed);
+            }
+          }}
+          className="rounded-full border border-slate-300 px-5 py-3 font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+        >
+          ðŸ“‹ {d.shareCopy}
         </button>
       </div>
       {status && (

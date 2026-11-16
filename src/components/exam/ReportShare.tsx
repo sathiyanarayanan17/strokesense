@@ -52,7 +52,7 @@ export function ReportShare({ results, lastKnownWell, completedAt }: Props) {
       </h3>
       <p className="mt-1 text-sm text-slate-600">
         Show this QR code to the ambulance or hospital staff, or send the link ahead. The results are stored inside the
-        link itself — nothing is uploaded or saved on a server.
+        link itself â€” nothing is uploaded or saved on a server.
       </p>
       <div className="mt-4 flex flex-col items-center gap-5 sm:flex-row sm:items-start">
         <div className="grid h-[200px] w-[200px] shrink-0 place-items-center rounded-xl bg-white ring-1 ring-slate-200">
@@ -60,7 +60,7 @@ export function ReportShare({ results, lastKnownWell, completedAt }: Props) {
             // eslint-disable-next-line @next/next/no-img-element -- data: URL generated on the device
             <img src={share.qr} alt="QR code linking to the handoff report" width={200} height={200} className="rounded-xl" />
           ) : (
-            <span className="text-sm text-slate-400">{share ? "QR unavailable" : "Generating…"}</span>
+            <span className="text-sm text-slate-600">{share ? "QR unavailable" : "Generatingâ€¦"}</span>
           )}
         </div>
         <div className="flex w-full flex-col gap-3">

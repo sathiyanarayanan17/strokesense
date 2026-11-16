@@ -33,7 +33,9 @@ After the check:
 - **Nearby hospitals** from OpenStreetMap, with distance, call and directions.
 - **First-aid steps and a live clock** since the person was last seen well. The steps are fixed, conservative templates (no food, drink or aspirin; recovery position if drowsy), not generated text.
 - **One-tap WhatsApp / SMS** with the report link and, if the user taps "Add my location", a maps link. The user chooses the recipient.
-- **Larger text and high contrast** options, remembered on the device only.
+- **Larger text, high contrast, voice-guidance on/off and a country setting**, remembered on the device only. The emergency number (108/112 in India, 911, 999, 000 and others) follows the phone's time zone and language, and can be overridden. An Indian time zone always gives 108/112.
+- **Practice mode** (`/practice`): the same guided flow with sharing turned off, for rehearsing on a calm day.
+- **Install prompt** for the offline app, a **copy-message** fallback when WhatsApp or SMS is unavailable, and a **printable handoff report** with space for handwritten notes.
 - **English, à¤¹à¤¿à¤¨à¥à¤¦à¥€, à®¤à®®à®¿à®´à¯** explanations for the family, with read-aloud.
 - **Works offline** after the first visit (PWA + service worker caching the AI models).
 
@@ -76,10 +78,10 @@ Camera access needs HTTPS or `localhost`. To try it on a phone, deploy (below) o
 ## Quality checks
 
 ```bash
-npm test             # 76 unit tests: scoring maths, speech model parity, risk engine, report, hospitals, translations
+npm test             # 86 unit tests: scoring maths, speech model parity, risk engine, report, hospitals, translations
 npm run eval         # synthetic robustness evaluation â†’ docs/EVALUATION.md
 npm run build && npm start   # then, in another terminal:
-npm run e2e          # end-to-end test in headless Edge with a fake camera (BROWSER=chrome to use Chrome)
+npm run e2e          # end-to-end test (incl. axe accessibility scan) in headless Edge with a fake camera (BROWSER=chrome to use Chrome)
 npm run lint
 cd python && pip install -e ".[dev]" && python -m pytest   # Python port of the scoring engine (75 tests, including parity with the TypeScript engine)
 ```

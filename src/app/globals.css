@@ -50,3 +50,23 @@ html[data-contrast="high"] button:focus-visible {
   outline: 3px solid #000000;
   outline-offset: 2px;
 }
+
+/* Printing the handoff report: plain, one clean page for the ambulance crew or the family. */
+@media print {
+  @page {
+    margin: 12mm;
+  }
+  body {
+    background: #fff;
+    color: #000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  tr,
+  section {
+    break-inside: avoid;
+  }
+  a[href^="http"]::after {
+    content: none;
+  }
+}

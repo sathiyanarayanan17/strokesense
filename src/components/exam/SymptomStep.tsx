@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { speak } from "@/lib/voice";
 import { scoreReported, type ReportedAnswer, type ReportedTest } from "@/lib/scoring/reported";
 import type { TestResult } from "@/lib/scoring/types";
 
@@ -28,6 +29,9 @@ const OPTIONS: Array<{ value: ReportedAnswer; label: string; cls: string }> = [
 export function SymptomStep({ onDone }: { onDone: (results: TestResult[]) => void }) {
   const [answers, setAnswers] = useState<Partial<Record<ReportedTest, ReportedAnswer>>>({});
   const complete = QUESTIONS.every((q) => answers[q.id]);
+  useEffect(() => {
+    speak("Two quick questions. Did they suddenly lose balance or feel very dizzy? Did they suddenly lose vision or see double?");
+  }, []);
 
   return (
     <section aria-labelledby="symptom-title" className="mx-auto max-w-xl space-y-6">

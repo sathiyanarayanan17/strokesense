@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { speak } from "@/lib/voice";
 
 /**
  * "Last known well" is the single most important fact for the emergency team:
@@ -8,6 +9,9 @@ import { useState } from "react";
  */
 export function OnsetStep({ onDone }: { onDone: (lastKnownWell: string | null) => void }) {
   const [custom, setCustom] = useState("");
+  useEffect(() => {
+    speak("When was the person last seen normal? Tap just now, or pick an earlier time.");
+  }, []);
 
   function applyCustomTime() {
     const t = Date.parse(custom);

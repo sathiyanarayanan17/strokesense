@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { DICTS, explainResult, LANGS, type Lang } from "@/lib/i18n";
+import { useEmergencyNumbers } from "@/lib/prefs";
 import { buildReport, encodeReport } from "@/lib/report";
 import { assessRisk, describeOnset, type RiskTier } from "@/lib/scoring/risk";
 import type { Finding, TestId, TestResult } from "@/lib/scoring/types";
@@ -16,7 +17,7 @@ const TIER_STYLE: Record<RiskTier, string> = {
   emergency: "bg-rose-600 text-white",
   possible: "bg-amber-500 text-slate-950",
   inconclusive: "bg-slate-700 text-white",
-  "no-signs": "bg-emerald-600 text-white",
+  "no-signs": "bg-emerald-700 text-white",
 };
 
 const FINDING_STYLE: Record<Finding, string> = {
@@ -34,14 +35,17 @@ interface Props {
   lastKnownWell: string | null;
   completedAt: number;
   onRestart: () => void;
+  /** Practice run: hides sharing and hospital search so nothing looks like a real report. */
+  practice?: boolean;
 }
 
-export function Results({ results, lastKnownWell, completedAt, onRestart }: Props) {
+export function Results({ results, lastKnownWell, completedAt, onRestart, practice = false }: Props) {
   const [lang, setLang] = useState<Lang>("en");
   const [voiceMsg, setVoiceMsg] = useState<string | null>(null);
   const d = DICTS[lang];
   const risk = assessRisk(results);
   const now = useNow(completedAt);
+  const numbers = useEmergencyNumbers();
   const onset = describeOnset(lastKnownWell, now);
   const reportUrl = useMemo(
     () =>
@@ -60,11 +64,21 @@ export function Results({ results, lastKnownWell, completedAt, onRestart }: Prop
     }
     setVoiceMsg(null);
     const findings = sorted.filter((r) => r.finding === "abnormal" || r.finding === "borderline").map((r) => explainResult(r, lang));
-    speak([tierText.headline, tierText.advice, ...findings].join(". "), undefined, 5000, speechLang);
+    speak([tierText.headline, tierText.advice, ...findings].join(". "), undefined, 5000, speechLang, true);
   }
 
   return (
     <section aria-labelledby="result-title" className="space-y-6" lang={lang}>
+      {practice && (
+        <p className="rounded-2xl border-2 border-dashed border-slate-400 bg-slate-50 p-4 text-center font-semibold text-slate-800" role="note">
+          Practice run. This is not a real check, and nothing here is shared or saved. In a real emergency, call {numbers[0]} first.
+        </p>
+      )}
+      {practice && (
+        <p className="rounded-2xl border-2 border-dashed border-slate-400 bg-slate-50 p-4 text-center font-semibold text-slate-800" role="note">
+          Practice run. This is not a real check, and nothing here is shared or saved. In a real emergency, call {numbers[0]} first.
+        </p>
+      )}
       <div className="flex flex-wrap items-center justify-end gap-2" role="group" aria-label="Language">
         {LANGS.map((l) => (
           <button
@@ -88,18 +102,15 @@ export function Results({ results, lastKnownWell, completedAt, onRestart }: Prop
         </h2>
         <p className="mt-2 text-lg sm:text-xl">{tierText.advice}</p>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          {[
-            { tel: "108", label: d.call108 },
-            { tel: "112", label: d.call112 },
-          ].map((n) => (
+          {numbers.map((n, i) => (
             <a
-              key={n.tel}
-              href={`tel:${n.tel}`}
+              key={n}
+              href={`tel:${n}`}
               className={`rounded-full px-6 py-3 text-center text-lg font-bold shadow ${
                 urgent ? "bg-white text-rose-700 hover:bg-rose-50" : "bg-white/15 text-current ring-1 ring-current hover:bg-white/25"
               }`}
             >
-              {n.label}
+              {i === 0 ? d.callPrimary(n) : d.callOther(n)}
             </a>
           ))}
           <button
@@ -107,7 +118,7 @@ export function Results({ results, lastKnownWell, completedAt, onRestart }: Prop
             onClick={readAloud}
             className="rounded-full bg-black/15 px-6 py-3 text-lg font-semibold ring-1 ring-current hover:bg-black/25"
           >
-            🔊 {d.readAloud}
+            ðŸ”Š {d.readAloud}
           </button>
         </div>
         {voiceMsg && <p className="mt-3 text-sm">{voiceMsg}</p>}
@@ -165,12 +176,16 @@ export function Results({ results, lastKnownWell, completedAt, onRestart }: Prop
         ))}
       </ul>
 
-      <ShareToContacts lang={lang} headline={tierText.headline} ago={onset ? d.ago(onset.hours, onset.minutes) : null} reportUrl={reportUrl} />
+      {!practice && (
+        <>
+          <ShareToContacts lang={lang} headline={tierText.headline} ago={onset ? d.ago(onset.hours, onset.minutes) : null} reportUrl={reportUrl} />
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <ReportShare results={results} lastKnownWell={lastKnownWell} completedAt={completedAt} />
-        <NearbyHospitals />
-      </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <ReportShare results={results} lastKnownWell={lastKnownWell} completedAt={completedAt} />
+            <NearbyHospitals />
+          </div>
+        </>
+      )}
 
       <p className="rounded-2xl bg-slate-100 p-4 text-sm text-slate-600">{d.disclaimer}</p>
 

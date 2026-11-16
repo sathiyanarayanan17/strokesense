@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { EmergencyCallLink } from "@/components/EmergencyCallLink";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 const STEPS = [
   { letter: "B", title: "Balance", text: "Body tracking measures sway, leaning and stepping while the person stands still." },
@@ -10,7 +12,7 @@ const STEPS = [
 ];
 
 const AFTER = [
-  { title: "One clear answer", text: "Any single warning sign means call 108 now — the same rule paramedics use." },
+  { title: "One clear answer", text: "Any single warning sign means call for an ambulance now — the same rule paramedics use." },
   { title: "Handoff QR code", text: "A clinician-ready report the ER team can scan. Nothing is stored on a server." },
   { title: "Nearby hospitals", text: "Distances and directions from OpenStreetMap, one tap away." },
   { title: "English · हिन्दी · தமிழ்", text: "Results explained in the family's language, and read aloud." },
@@ -44,12 +46,13 @@ export default function Home() {
             >
               Start stroke check
             </Link>
-            <a
-              href="tel:108"
-              className="rounded-full border-2 border-rose-600 px-8 py-4 text-center text-lg font-bold text-rose-700 hover:bg-rose-50"
-            >
-              Emergency? Call 108
-            </a>
+            <EmergencyCallLink className="rounded-full border-2 border-rose-600 px-8 py-4 text-center text-lg font-bold text-rose-700 hover:bg-rose-50" />
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
+            <Link href="/practice" className="font-semibold text-slate-700 underline underline-offset-4">
+              Try a practice run first
+            </Link>
+            <InstallPrompt />
           </div>
           <dl className="mt-12 grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
             {FACTS.map((f) => (

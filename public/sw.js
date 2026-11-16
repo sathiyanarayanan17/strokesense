@@ -2,10 +2,10 @@
 // - Pages: network first, fall back to the cached copy when offline.
 // - Next.js static assets, AI models and the WASM runtime: cache first (they are immutable per version).
 // - Third-party requests (hospital search) are never cached.
-const VERSION = "v1";
+const VERSION = "v2";
 const PAGES = `strokesense-pages-${VERSION}`;
 const ASSETS = `strokesense-assets-${VERSION}`;
-const PRECACHE = ["/", "/exam", "/report", "/icon.svg"];
+const PRECACHE = ["/", "/exam", "/practice", "/report", "/icon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(PAGES).then((c) => c.addAll(PRECACHE)).then(() => self.skipWaiting()));
