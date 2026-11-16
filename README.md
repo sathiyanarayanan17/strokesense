@@ -31,6 +31,9 @@ After the check:
 - **Handoff report + QR code** â€” a clinician-ready summary. The data is encoded in the link's `#fragment`, which
   browsers never send to a server, so nothing is uploaded or stored. Decoded data is validated as untrusted input.
 - **Nearby hospitals** from OpenStreetMap, with distance, call and directions.
+- **First-aid steps and a live clock** since the person was last seen well. The steps are fixed, conservative templates (no food, drink or aspirin; recovery position if drowsy), not generated text.
+- **One-tap WhatsApp / SMS** with the report link and, if the user taps "Add my location", a maps link. The user chooses the recipient.
+- **Larger text and high contrast** options, remembered on the device only.
 - **English, à¤¹à¤¿à¤¨à¥à¤¦à¥€, à®¤à®®à®¿à®´à¯** explanations for the family, with read-aloud.
 - **Works offline** after the first visit (PWA + service worker caching the AI models).
 
@@ -73,7 +76,7 @@ Camera access needs HTTPS or `localhost`. To try it on a phone, deploy (below) o
 ## Quality checks
 
 ```bash
-npm test             # 72 unit tests: scoring maths, speech model parity, risk engine, report, hospitals, translations
+npm test             # 76 unit tests: scoring maths, speech model parity, risk engine, report, hospitals, translations
 npm run eval         # synthetic robustness evaluation â†’ docs/EVALUATION.md
 npm run build && npm start   # then, in another terminal:
 npm run e2e          # end-to-end test in headless Edge with a fake camera (BROWSER=chrome to use Chrome)

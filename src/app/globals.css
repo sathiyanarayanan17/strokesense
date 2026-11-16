@@ -28,3 +28,25 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Display options (components/AccessibilityBar). Tailwind sizes are rem-based, so this scales the whole UI. */
+html[data-text="large"] {
+  font-size: 125%;
+}
+
+html[data-contrast="high"] body {
+  background: #ffffff;
+  color: #000000;
+}
+html[data-contrast="high"] :is(.text-slate-400, .text-slate-500, .text-slate-600, .text-slate-700) {
+  color: #000000;
+}
+html[data-contrast="high"] :is(.border-slate-200, .border-slate-300, .ring-slate-200, .ring-slate-300) {
+  border-color: #000000;
+  --tw-ring-color: #000000;
+}
+html[data-contrast="high"] a:focus-visible,
+html[data-contrast="high"] button:focus-visible {
+  outline: 3px solid #000000;
+  outline-offset: 2px;
+}

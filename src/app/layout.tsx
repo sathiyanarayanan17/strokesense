@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { AccessibilityBar } from "@/components/AccessibilityBar";
 import { ServiceWorker } from "@/components/ServiceWorker";
 import "./globals.css";
 
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col font-sans">
+        <AccessibilityBar />
         {children}
         <ServiceWorker />
       </body>

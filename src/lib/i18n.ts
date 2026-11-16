@@ -37,6 +37,18 @@ interface Dict {
   disclaimer: string;
   readAloud: string;
   noVoice: string;
+  firstAidTitle: string;
+  /** Fixed, conservative guidance while waiting for the ambulance. Never generated. */
+  firstAid: string[];
+  elapsedTitle: string;
+  shareTitle: string;
+  shareWhatsapp: string;
+  shareSms: string;
+  shareAddLocation: string;
+  shareLocating: string;
+  shareLocationFailed: string;
+  shareLocationAdded: string;
+  shareMessage: (p: { headline: string; ago: string | null; reportUrl: string; mapUrl: string | null }) => string;
 }
 
 const en: Dict = {
@@ -87,6 +99,32 @@ const en: Dict = {
     "StrokeSense is a screening aid, not a diagnosis. It can miss strokes and can raise false alarms. If in doubt, always call emergency services.",
   readAloud: "Read aloud",
   noVoice: "This device has no voice for this language.",
+  firstAidTitle: "While you wait for the ambulance",
+  firstAid: [
+    "Stay with the person. Keep them calm and comfortable, and do not let them walk around.",
+    "Note the time the symptoms started, or when they were last seen normal, and tell the ambulance crew.",
+    "Do not give food, drink or medicine, including aspirin. Swallowing may not be safe.",
+    "If they are drowsy or vomiting, help them lie on their side.",
+    "Loosen tight clothing. Unlock the door and send someone to meet the ambulance.",
+    "If they stop responding or stop breathing normally, tell the emergency operator and follow their instructions.",
+  ],
+  elapsedTitle: "Time since last known well",
+  shareTitle: "Send to family or the hospital",
+  shareWhatsapp: "WhatsApp",
+  shareSms: "SMS",
+  shareAddLocation: "Add my location",
+  shareLocating: "Getting your location…",
+  shareLocationFailed: "Could not get your location. You can still send the message.",
+  shareLocationAdded: "Location added to the message.",
+  shareMessage: ({ headline, ago, reportUrl, mapUrl }) =>
+    [
+      `StrokeSense: ${headline}.`,
+      ago ? `Last known well: ${ago}.` : null,
+      `Report: ${reportUrl}`,
+      mapUrl ? `Location: ${mapUrl}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n"),
 };
 
 const hi: Dict = {
@@ -137,6 +175,32 @@ const hi: Dict = {
     "StrokeSense केवल एक स्क्रीनिंग सहायक है, निदान नहीं। यह स्ट्रोक को चूक सकता है और गलत चेतावनी भी दे सकता है। शक हो तो हमेशा आपातकालीन सेवा को कॉल करें।",
   readAloud: "पढ़कर सुनाएं",
   noVoice: "इस डिवाइस में इस भाषा की आवाज़ उपलब्ध नहीं है।",
+  firstAidTitle: "एम्बुलेंस आने तक",
+  firstAid: [
+    "व्यक्ति के साथ रहें। उन्हें शांत और आराम से रखें, और चलने-फिरने न दें।",
+    "लक्षण शुरू होने का समय, या आखिरी बार ठीक देखे जाने का समय नोट करें और एम्बुलेंस टीम को बताएं।",
+    "कोई खाना, पानी या दवा न दें, एस्पिरिन भी नहीं। निगलना सुरक्षित नहीं हो सकता।",
+    "अगर वे सुस्त हों या उल्टी कर रहे हों, तो उन्हें करवट के बल लिटाएं।",
+    "तंग कपड़े ढीले करें। दरवाज़ा खुला रखें और किसी को एम्बुलेंस को रास्ता दिखाने भेजें।",
+    "अगर वे जवाब देना बंद कर दें या सामान्य रूप से सांस न लें, तो आपातकालीन ऑपरेटर को बताएं और उनके निर्देशों का पालन करें।",
+  ],
+  elapsedTitle: "आखिरी बार ठीक देखे जाने के बाद का समय",
+  shareTitle: "परिवार या अस्पताल को भेजें",
+  shareWhatsapp: "WhatsApp",
+  shareSms: "SMS",
+  shareAddLocation: "मेरी लोकेशन जोड़ें",
+  shareLocating: "आपकी लोकेशन ली जा रही है…",
+  shareLocationFailed: "लोकेशन नहीं मिल सकी। आप फिर भी संदेश भेज सकते हैं।",
+  shareLocationAdded: "संदेश में लोकेशन जोड़ दी गई।",
+  shareMessage: ({ headline, ago, reportUrl, mapUrl }) =>
+    [
+      `StrokeSense: ${headline}।`,
+      ago ? `आखिरी बार ठीक देखे गए: ${ago}।` : null,
+      `रिपोर्ट: ${reportUrl}`,
+      mapUrl ? `लोकेशन: ${mapUrl}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n"),
 };
 
 const ta: Dict = {
@@ -187,6 +251,32 @@ const ta: Dict = {
     "StrokeSense ஒரு முன்னோட்டப் பரிசோதனை உதவி மட்டுமே, நோயறிதல் அல்ல. இது பக்கவாதத்தைத் தவறவிடலாம் அல்லது தவறான எச்சரிக்கை தரலாம். சந்தேகம் இருந்தால் எப்போதும் அவசர சேவையை அழைக்கவும்.",
   readAloud: "சத்தமாகப் படிக்கவும்",
   noVoice: "இந்தச் சாதனத்தில் இந்த மொழிக்கான குரல் இல்லை.",
+  firstAidTitle: "ஆம்புலன்ஸ் வரும் வரை",
+  firstAid: [
+    "அவருடன் இருங்கள். அமைதியாகவும் வசதியாகவும் வைத்திருங்கள்; நடக்க விட வேண்டாம்.",
+    "அறிகுறிகள் தொடங்கிய நேரத்தை, அல்லது கடைசியாக இயல்பாக இருந்த நேரத்தைக் குறித்து ஆம்புலன்ஸ் குழுவிடம் சொல்லுங்கள்.",
+    "உணவு, தண்ணீர் அல்லது மருந்து எதுவும் கொடுக்க வேண்டாம்; ஆஸ்பிரின் உட்பட. விழுங்குவது பாதுகாப்பாக இருக்காது.",
+    "அவர் மயக்கமாக இருந்தால் அல்லது வாந்தி எடுத்தால், ஒருக்களித்துப் படுக்க வைக்கவும்.",
+    "இறுக்கமான ஆடைகளைத் தளர்த்தவும். கதவைத் திறந்து வைத்து, ஆம்புலன்ஸுக்கு வழிகாட்ட ஒருவரை அனுப்பவும்.",
+    "அவர் பதிலளிக்காமல் போனால் அல்லது சாதாரணமாக மூச்சு விடாவிட்டால், அவசர சேவை ஆபரேட்டரிடம் சொல்லி அவர்களின் வழிமுறைகளைப் பின்பற்றவும்.",
+  ],
+  elapsedTitle: "கடைசியாக நலமாக இருந்ததிலிருந்து கடந்த நேரம்",
+  shareTitle: "குடும்பத்தினர் அல்லது மருத்துவமனைக்கு அனுப்பவும்",
+  shareWhatsapp: "WhatsApp",
+  shareSms: "SMS",
+  shareAddLocation: "என் இருப்பிடத்தைச் சேர்",
+  shareLocating: "உங்கள் இருப்பிடம் பெறப்படுகிறது…",
+  shareLocationFailed: "இருப்பிடத்தைப் பெற முடியவில்லை. இருந்தாலும் செய்தியை அனுப்பலாம்.",
+  shareLocationAdded: "செய்தியில் இருப்பிடம் சேர்க்கப்பட்டது.",
+  shareMessage: ({ headline, ago, reportUrl, mapUrl }) =>
+    [
+      `StrokeSense: ${headline}.`,
+      ago ? `கடைசியாக நலமாக இருந்தது: ${ago}.` : null,
+      `அறிக்கை: ${reportUrl}`,
+      mapUrl ? `இருப்பிடம்: ${mapUrl}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n"),
 };
 
 export const DICTS: Record<Lang, Dict> = { en, hi, ta };

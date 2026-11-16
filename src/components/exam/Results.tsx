@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DICTS, explainResult, LANGS, type Lang } from "@/lib/i18n";
+import { buildReport, encodeReport } from "@/lib/report";
 import { assessRisk, describeOnset, type RiskTier } from "@/lib/scoring/risk";
 import type { Finding, TestId, TestResult } from "@/lib/scoring/types";
+import { useNow } from "@/lib/useNow";
 import { findVoice, speak } from "@/lib/voice";
+import { FirstAid } from "./FirstAid";
 import { NearbyHospitals } from "./NearbyHospitals";
 import { ReportShare } from "./ReportShare";
+import { ShareToContacts } from "./ShareToContacts";
 
 const TIER_STYLE: Record<RiskTier, string> = {
   emergency: "bg-rose-600 text-white",
@@ -37,7 +41,13 @@ export function Results({ results, lastKnownWell, completedAt, onRestart }: Prop
   const [voiceMsg, setVoiceMsg] = useState<string | null>(null);
   const d = DICTS[lang];
   const risk = assessRisk(results);
-  const onset = describeOnset(lastKnownWell, completedAt);
+  const now = useNow(completedAt);
+  const onset = describeOnset(lastKnownWell, now);
+  const reportUrl = useMemo(
+    () =>
+      typeof window === "undefined" ? null : `${window.location.origin}/report#${encodeReport(buildReport(results, lastKnownWell, completedAt))}`,
+    [results, lastKnownWell, completedAt],
+  );
   const urgent = risk.tier === "emergency" || risk.tier === "possible";
   const sorted = [...results].sort((a, b) => ORDER.indexOf(a.test) - ORDER.indexOf(b.test));
   const tierText = d.tier[risk.tier];
@@ -104,7 +114,7 @@ export function Results({ results, lastKnownWell, completedAt, onRestart }: Prop
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h3 className="font-semibold text-slate-900">{d.lastKnownWell}</h3>
+        <h3 className="font-semibold text-slate-900">{onset ? d.elapsedTitle : d.lastKnownWell}</h3>
         {onset ? (
           <p className="text-slate-700">
             <span className="font-semibold">{d.ago(onset.hours, onset.minutes)}</span> ({new Date(lastKnownWell!).toLocaleString()}).{" "}
@@ -114,6 +124,8 @@ export function Results({ results, lastKnownWell, completedAt, onRestart }: Prop
           <p className="text-slate-700">{d.onsetUnknown}</p>
         )}
       </div>
+
+      {urgent && <FirstAid lang={lang} />}
 
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {sorted.map((r) => (
@@ -152,6 +164,8 @@ export function Results({ results, lastKnownWell, completedAt, onRestart }: Prop
           </li>
         ))}
       </ul>
+
+      <ShareToContacts lang={lang} headline={tierText.headline} ago={onset ? d.ago(onset.hours, onset.minutes) : null} reportUrl={reportUrl} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <ReportShare results={results} lastKnownWell={lastKnownWell} completedAt={completedAt} />

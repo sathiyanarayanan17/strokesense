@@ -107,6 +107,16 @@ try {
   await page.getByText("சோதிக்கப்படவில்லை").first().waitFor();
   ok("results translate to Hindi and Tamil");
 
+  await page.getByRole("heading", { name: "ஆம்புலன்ஸ் வரும் வரை" }).waitFor();
+  const wa = await page.getByRole("link", { name: "WhatsApp" }).getAttribute("href");
+  if (!wa?.startsWith("https://wa.me/?text=") || !decodeURIComponent(wa).includes("/report#")) throw new Error(`bad WhatsApp link: ${wa}`);
+  ok("first-aid steps shown (Tamil) and WhatsApp message carries the report link");
+
+  await page.getByRole("button", { name: /Larger text/ }).click();
+  if ((await page.evaluate(() => document.documentElement.dataset.text)) !== "large") throw new Error("larger text did not apply");
+  await page.getByRole("button", { name: /Larger text/ }).click();
+  ok("larger-text option toggles");
+
   const reportUrl = await page.getByRole("link", { name: "Open report" }).getAttribute("href");
   const report = await context.newPage();
   await report.goto(reportUrl);
