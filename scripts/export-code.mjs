@@ -6,10 +6,10 @@ import { dirname, extname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const INCLUDE_DIRS = ["src", "scripts", "public", "ml"];
+const INCLUDE_DIRS = ["src", "scripts", "public", "ml", "python"];
 const INCLUDE_FILES = ["package.json", "next.config.ts", "tsconfig.json", "eslint.config.mjs", "vitest.config.mts", "vitest.eval.config.mts"];
 const EXTS = new Set([".ts", ".tsx", ".mjs", ".js", ".css", ".json", ".svg", ".py", ".txt"]);
-const SKIP = [/^public[\\/](mediapipe|models)/, /favicon\.ico$/, /^ml[\\/]\.venv/, /__pycache__/, /speech-model\.reference\.json$/, /features\.fixture\.json$/];
+const SKIP = [/^public[\\/](mediapipe|models)/, /favicon\.ico$/, /^ml[\\/]\.venv/, /^python[\\/](\.venv|.*egg-info)/, /\.pytest_cache/, /__pycache__/, /speech-model\.reference\.json$/, /features\.fixture\.json$/, /parity\.fixture\.json$/];
 
 async function walk(dir) {
   const out = [];

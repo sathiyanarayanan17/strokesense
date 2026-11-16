@@ -14,4 +14,4 @@ pip install -e ".[dev]"
 python -m pytest
 ```
 
-The tests mirror the vitest suites (53 cases). If you change a threshold in one language, change it in the other.
+The tests mirror the vitest suites. `tests/test_parity.py` also replays 22 recorded inputs and checks the output matches the TypeScript engine (summary text, findings, metrics to 9 decimals). After an intentional change to the TypeScript scoring, run `npm run parity:update` in the repo root, then port the change.

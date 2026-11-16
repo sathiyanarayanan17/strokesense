@@ -1,4 +1,4 @@
-﻿# StrokeSense â€” spot a stroke in 60 seconds, with just a phone
+# StrokeSense â€” spot a stroke in 60 seconds, with just a phone
 
 [![CI](https://github.com/sathiyanarayanan17/strokesense/actions/workflows/ci.yml/badge.svg)](https://github.com/sathiyanarayanan17/strokesense/actions/workflows/ci.yml)
 
@@ -73,12 +73,12 @@ Camera access needs HTTPS or `localhost`. To try it on a phone, deploy (below) o
 ## Quality checks
 
 ```bash
-npm test             # 71 unit tests: scoring maths, speech model parity, risk engine, report, hospitals, translations
+npm test             # 72 unit tests: scoring maths, speech model parity, risk engine, report, hospitals, translations
 npm run eval         # synthetic robustness evaluation â†’ docs/EVALUATION.md
 npm run build && npm start   # then, in another terminal:
 npm run e2e          # end-to-end test in headless Edge with a fake camera (BROWSER=chrome to use Chrome)
 npm run lint
-cd python && pip install -e ".[dev]" && python -m pytest   # Python port of the scoring engine (53 tests)
+cd python && pip install -e ".[dev]" && python -m pytest   # Python port of the scoring engine (75 tests, including parity with the TypeScript engine)
 ```
 
 ### Evaluation summary ([full report](docs/EVALUATION.md))

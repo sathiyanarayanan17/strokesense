@@ -10,6 +10,7 @@
     "test": "vitest run",
     "eval": "vitest run --config vitest.eval.config.mts",
     "e2e": "node scripts/e2e-smoke.mjs",
+    "parity:update": "node scripts/parity-update.mjs",
     "export-code": "node scripts/export-code.mjs",
     "postinstall": "node scripts/setup-assets.mjs"
   },

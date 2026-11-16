@@ -6,7 +6,7 @@
 <style>
   @page { size: A4; margin: 12mm; }
   * { box-sizing: border-box; }
-  body { font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; color: #0f172a; margin: 0; font-size: 8.8pt; line-height: 1.3; }
+  body { font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; color: #0f172a; margin: 0; font-size: 8.5pt; line-height: 1.28; }
   .page { max-width: 186mm; margin: 0 auto; }
   header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #e11d48; padding-bottom: 6px; margin-bottom: 8px; }
   h1 { font-size: 22pt; margin: 0; letter-spacing: -0.5px; }
@@ -16,7 +16,7 @@
   h2 { font-size: 10.5pt; color: #e11d48; text-transform: uppercase; letter-spacing: 0.6px; margin: 9px 0 3px; }
   p { margin: 0 0 4px; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
-  table { width: 100%; border-collapse: collapse; font-size: 8.8pt; }
+  table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
   th, td { text-align: left; padding: 2.5px 5px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
   th { background: #f8fafc; color: #475569; font-weight: 600; }
   td b.l { display: inline-block; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 4px; background: #e11d48; color: #fff; font-size: 8.5pt; margin-right: 4px; }
@@ -53,7 +53,7 @@
   <table>
     <tr><th style="width:24%">Check</th><th>How it is measured</th></tr>
     <tr><td><b class="l">T</b>Time</td><td>"Last known well" recorded first; time-window guidance (≤4.5 h, ≤24 h).</td></tr>
-    <tr><td><b class="l">B</b><b class="l">E</b>Balance, Eyes</td><td>Guided bystander questions on sudden balance or vision loss.</td></tr>
+    <tr><td><b class="l">B</b><b class="l">E</b>Balance, Eyes</td><td>Pose tracking: sway, lean, stepping. Iris tracking: both eyes follow a dot. Merged with the bystander's answer.</td></tr>
     <tr><td><b class="l">F</b>Face</td><td>MediaPipe Face Landmarker (478 pts). Mouth-corner excursion from rest → smile in a face-aligned frame (cancels head tilt and distance); turned-head frames rejected. Asymmetry index + droop.</td></tr>
     <tr><td><b class="l">A</b>Arms</td><td>MediaPipe Pose: wrist height vs shoulder line over a 10 s eyes-closed hold — a camera pronator-drift test. Detects one-sided drift or failure to raise; ignores both arms tiring.</td></tr>
     <tr><td><b class="l">S</b>Speech</td><td>Cincinnati sentence: word error rate + on-device pause analysis + a <b>trained slurred-speech model</b> (TORGO) + bystander judgement (human in the loop).</td></tr>
@@ -97,9 +97,10 @@ Stack: Next.js 16 · React 19 · TypeScript · Tailwind 4 · MediaPipe Tasks · 
         <tr><td>Face — typical phone</td><td>100%</td><td>99.3%</td></tr>
         <tr><td>Face — hard (3 px jitter, ±20° tilt)</td><td>98.5%</td><td>93.8%</td></tr>
         <tr><td>Arms — typical phone (incl. fatigue)</td><td>100%</td><td>100%</td></tr>
+        <tr><td>Balance (4 px jitter) / Eyes (3 px jitter)</td><td>100% / 99.8%</td><td>99.0% / 99.8%</td></tr>
         <tr><td><b>Trained speech model</b> — TORGO, held-out speakers (AUC 0.78 on sentences, 13/15 speakers correct)</td><td colspan="2">AUC 0.70 overall</td></tr>
       </table>
-      <p style="margin-top:3px">Plus 51 unit tests and an end-to-end browser test. <i>Not clinical validation.</i></p>
+      <p style="margin-top:3px">Plus 72 unit tests, 75 Python tests and an end-to-end test. <i>Not clinical validation.</i></p>
     </div>
     <div>
       <h2>Impact &amp; next steps</h2>
@@ -108,7 +109,7 @@ Stack: Next.js 16 · React 19 · TypeScript · Tailwind 4 · MediaPipe Tasks · 
       private, offline-capable tool on the phones people already own can shorten the time to calling an ambulance and
       give hospitals a head start.</p>
       <div class="box"><b>Next:</b> calibrate thresholds on clinical data (Toronto NeuroFace, TORGO) and an ED pilot;
-      add eye-movement and gait tests; connect to 108 dispatch; more Indian languages.</div>
+      add gait tests; connect to 108 dispatch; more Indian languages.</div>
     </div>
   </div>
 
