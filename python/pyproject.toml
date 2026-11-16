@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "strokesense"
+version = "0.1.0"
+description = "StrokeSense in Python: BE-FAST stroke screening with on-device computer vision and a trained speech model"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+include = ["strokesense*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

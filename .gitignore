@@ -52,3 +52,6 @@ e2e-failure.png
 /ml/*.log
 /ml/*.err
 __pycache__/
+/python/.venv/
+/python/*.egg-info/
+.pytest_cache/
